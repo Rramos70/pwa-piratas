@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Softball Club - Inicio</title>
+  <title>PIRATAS DE TENERIFE - Inicio</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#2E7D32">
@@ -12,17 +12,22 @@
 
   <div class="mobile-app-wrapper">
     <header class="main-header">
-      <div class="header-container" style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h1><span aria-hidden="true">🥎</span> Softball Club</h1>
-          <p class="subtitle">Temporada 2026</p>
+      <div class="header-container" style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <!-- LOGOTIPO EN LA RAÍZ -->
+          <img src="logop.png" alt="Logotipo de Piratas de Tenerife" style="width: 45px; height: 45px; object-fit: contain;">
+          <div>
+            <h1 style="margin: 0; font-size: 1.5rem;"><span aria-hidden="true">🥎</span> PIRATAS DE TENERIFE</h1>
+            <p class="subtitle" style="margin: 0;">Temporada 2026</p>
+          </div>
         </div>
-        <div id="user-profile-badge" style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; text-align: right;">
+        <div id="user-profile-badge" style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; text-align: right; flex-shrink: 0;">
           👋 Hola, <span id="session-username">...</span>
         </div>
       </div>
     </header>
 
+    <!-- MAIN: Contiene todo el contenido dinámico principal -->
     <main class="app-container">
       
       <!-- ÚLTIMO RESULTADO -->
@@ -73,6 +78,7 @@
           </form>
         </div>
       </section>
+
       <!-- LISTAS DE CONFIRMACIÓN -->
       <section class="card lists-card" id="lists-card" aria-label="Listas de asistencia">
         <div class="attendance-split">
@@ -87,36 +93,37 @@
         </div>
       </section>
 
-      <!-- SECCIÓN DE CUMPLEAÑEROS (AHORA ABAJO) -->
+      <!-- SECCIÓN DE CUMPLEAÑEROS -->
       <section class="card lists-card" id="birthday-card" aria-label="Cumpleañeros del mes">
         <div class="card-header">
           <span class="pill-badge" id="birthday-title" style="background-color: #0288d1; color: white;">🎂 Cumpleaños del Mes</span>
         </div>
         <ul id="birthday-list" class="modern-player-list" style="padding: 10px 0 0 0; display: flex; flex-direction: column; gap: 6px;">
-          <!-- Se inyecta con JavaScript -->
+          <!-- Se inyecta dinámicamente con Firebase -->
         </ul>
       </section>
 
-    </main>
-          <!-- SECCIÓN DE HISTORIAL DE PARTIDOS REALIZADOS -->
+      <!-- SECCIÓN DE HISTORIAL DE PARTIDOS REALIZADOS -->
       <section class="card lists-card" id="history-matches-card" aria-label="Historial de partidos realizados">
         <div class="card-header">
           <span class="pill-badge" style="background-color: #37474f; color: white;">📋 Historial de Partidos</span>
         </div>
         <ul id="history-matches-list" class="modern-player-list" style="padding: 10px 0 0 0; display: flex; flex-direction: column; gap: 8px;">
-          <!-- Se inyecta dinámicamente con JavaScript -->
+          <!-- Se inyecta dinámicamente con Firebase -->
         </ul>
       </section>
-      <!-- SECCIÓN DE PRÓXIMOS ENCUENTROS (HISTORIAL COMPLETO POR REALIZAR) -->
+
+      <!-- SECCIÓN DE PRÓXIMOS ENCUENTROS -->
       <section class="card lists-card" id="upcoming-matches-card" aria-label="Partidos por realizar">
         <div class="card-header">
           <span class="pill-badge" style="background-color: #f57c00; color: white;">🗓️ Agenda de Partidos</span>
         </div>
         <ul id="upcoming-matches-list" class="modern-player-list" style="padding: 10px 0 0 0; display: flex; flex-direction: column; gap: 8px;">
-          <!-- Se inyecta dinámicamente con JavaScript -->
+          <!-- Se inyecta dinámicamente con Firebase -->
         </ul>
       </section>
 
+    </main>
 
     <!-- MENÚ DE NAVEGACIÓN -->
     <nav class="bottom-nav">
@@ -132,13 +139,18 @@
         <span class="nav-icon" aria-hidden="true">👥</span>
         <span class="nav-label">Usuarios</span>
       </a>
-      <button type="button" class="nav-item" onclick="if(confirm('¿Deseas cerrar tu sesión en el equipo?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; }">
+      <a href="#" class="nav-item" onclick="if(confirm('¿Deseas cerrar tu sesión en el equipo?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; } return false;">
         <span class="nav-icon" style="color:#c62828;" aria-hidden="true">🚪</span>
         <span class="nav-label" style="color:#c62828;">Salir</span>
-      </button>
+      </a>
     </nav>
   </div>
 
+  <!-- LIBRERÍAS NATIVAS DE FIREBASE EN SU VERSIÓN COMPATIBLE (CDN) -->
+  <script src="https://gstatic.com"></script>
+  <script src="https://gstatic.com"></script>
+  
+  <!-- TU SCRIPT DE LÓGICA -->
   <script src="app.js"></script>
 </body>
 </html>
