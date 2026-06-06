@@ -15,6 +15,12 @@
     .btn-primary { background-color: #2E7D32; color: white; }
     .btn-danger { background-color: #c62828; color: white; }
   </style>
+
+  <!-- ================================================================= -->
+  <!-- 1. LIBRERÍAS DE FIREBASE OBLIGATORIAS (Carga prioritaria)         -->
+  <!-- ================================================================= -->
+  <script src="https://gstatic.com"></script>
+  <script src="https://gstatic.com"></script>
 </head>
 <body>
   <div class="mobile-app-wrapper">
@@ -82,35 +88,32 @@
     </nav>
   </div>
 
-  <!-- ❌ ESTO DA ERROR 404 Y ROMPE TU APP -->
-<script src="https://gstatic.com"></script>
-<script src="https://gstatic.com"></script>
-
-
+  <!-- ================================================================= -->
+  <!-- 2. LÓGICA DE NEGOCIO CONTROLADA                                  -->
+  <!-- ================================================================= -->
   <script>
-    // 1. CONTROL DE ACCESO INMEDIATO ANTES DE INICIALIZAR
+    // Control de acceso inmediato por rol corporativo
     const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
     if (!loguedUser || loguedUser.role !== 'admin') {
       alert("Acceso denegado. Se requieren permisos de Administrador.");
       window.location.href = "index.html";
     }
 
-    // 2. CONFIGURACIÓN E INICIALIZACIÓN
+    // Configuración con tu URL exacta de Europa
     const firebaseConfig = {
       apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
       authDomain: "://firebaseapp.com",
-      databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app/", // ACTUALIZADO
+      databaseURL: "https://firebasedatabase.app",
       projectId: "piratas-tenerife",
       storageBucket: "piratas-tenerife.firebasestorage.app",
       messagingSenderId: "328725969132",
       appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
     };
 
-
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 3. CARGAR DATOS ACTUALES EN EL FORMULARIO
+    // Rellenar formulario con los datos guardados en la nube
     document.addEventListener('DOMContentLoaded', () => {
       db.ref('proximo_partido').once('value').then((snapshot) => {
         if (snapshot.exists()) {
@@ -123,10 +126,9 @@
           if(document.getElementById('input-time')) document.getElementById('input-time').value = data.hora || '';
           if(document.getElementById('input-stadium')) document.getElementById('input-stadium').value = data.estadio || '';
         }
-      });
+      }).catch(err => console.error("Error al sincronizar datos:", err));
     });
 
-    // 4. GUARDAR CAMBIOS
     function guardarProximoPartido(e) {
       e.preventDefault();
       db.ref('proximo_partido').set({
@@ -136,17 +138,16 @@
         fecha: document.getElementById('input-date').value.trim(),
         dia: document.getElementById('input-day').value.trim(),
         hora: document.getElementById('input-time').value,
-        estadio: document.getElementById('input-stadium').value.trim()
+        stadium: document.getElementById('input-stadium').value.trim()
       })
-      .then(() => alert("¡Datos del partido publicados con éxito!"))
+      .then(() => alert("¡Datos del encuentro publicados en la nube!"))
       .catch(err => alert("Error al guardar: " + err.message));
     }
 
-    // 5. REINICIAR ASISTENCIAS
     function limpiarAsistencias() {
-      if (confirm("¿Estás seguro de que quieres borrar TODAS las asistencias actuales? Esta acción no se puede deshacer.")) {
+      if (confirm("¿Deseas vaciar la lista de asistencias del partido actual?")) {
         db.ref('asistencias/partido_actual').remove()
-          .then(() => alert("Lista de asistencias vaciada correctamente."))
+          .then(() => alert("Lista de asistencias reiniciada correctamente."))
           .catch(err => alert("Error al limpiar: " + err.message));
       }
     }

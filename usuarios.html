@@ -14,9 +14,15 @@
     .role-admin { background-color: #e57373; color: #b71c1c; }
     .role-player { background-color: #c8e6c9; color: #1b5e20; }
     .btn-status { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
-    .status-activo { background-color: #ffe0b2; color: #e65100; } /* Al pulsar cambiará */
+    .status-activo { background-color: #ffe0b2; color: #e65100; }
     .status-inactivo { background-color: #cfd8dc; color: #37474f; }
   </style>
+
+  <!-- ================================================================= -->
+  <!-- 1. LIBRERÍAS DE FIREBASE OBLIGATORIAS (Carga prioritaria)         -->
+  <!-- ================================================================= -->
+  <script src="https://gstatic.com"></script>
+  <script src="https://gstatic.com"></script>
 </head>
 <body>
   <div class="mobile-app-wrapper">
@@ -30,7 +36,7 @@
     <main class="app-container users-list-wrapper">
       <section class="card">
         <h2 style="margin-bottom:12px;">Jugadores Registrados</h2>
-        <div id="loading-msg" style="text-align:center; padding:10px; font-style:italic; color:#777;">Cargando jugadores...</div>
+        <div id="loading-msg" style="text-align:center; padding:10px; font-style:italic; color:#777;">Sincronizando plantilla con el servidor...</div>
         <div id="container-usuarios-lista"></div>
       </section>
     </main>
@@ -44,35 +50,32 @@
     </nav>
   </div>
 
-  <!-- ❌ ESTO DA ERROR 404 Y ROMPE TU APP -->
-<script src="https://gstatic.com"></script>
-<script src="https://gstatic.com"></script>
-
-
+  <!-- ================================================================= -->
+  <!-- 2. LÓGICA DE NEGOCIO EN TIEMPO REAL                              -->
+  <!-- ================================================================= -->
   <script>
-    // 1. CONTROL DE ACCESO INMEDIATO ANTES DE INICIALIZAR
+    // Control de acceso inmediato por rol corporativo
     const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
     if (!loguedUser || loguedUser.role !== 'admin') {
       alert("Acceso denegado. Se requieren permisos de Administrador.");
       window.location.href = "index.html";
     }
 
-    // 2. CONFIGURACIÓN E INICIALIZACIÓN
+    // Configuración con tu URL exacta de Europa
     const firebaseConfig = {
       apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
       authDomain: "://firebaseapp.com",
-      databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app/", // ACTUALIZADO
+      databaseURL: "https://firebasedatabase.app",
       projectId: "piratas-tenerife",
       storageBucket: "piratas-tenerife.firebasestorage.app",
       messagingSenderId: "328725969132",
       appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
     };
 
-
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 3. ESCUCHA DE USUARIOS EN TIEMPO REAL
+    // Escucha activa de cambios en la base de datos (Sincronización instantánea)
     db.ref('usuarios').on('value', (snapshot) => {
       const loader = document.getElementById('loading-msg');
       if (loader) loader.style.display = 'none';
@@ -108,11 +111,12 @@
           listaContenedor.appendChild(row);
         });
       } else {
-        listaContenedor.innerHTML = '<p style="text-align:center; color:#777;">No hay usuarios registrados.</p>';
+        listaContenedor.innerHTML = '<p style="text-align:center; color:#777;">No se encontraron jugadores registrados en la base de datos.</p>';
       }
+    }, (error) => {
+      console.error("Fallo de lectura en Firebase:", error);
     });
 
-    // 4. CAMBIAR ESTADO DE ACTIVO/INACTIVO
     function toggleStatus(id, currentStatus) {
       const newStatus = currentStatus === 'inactivo' ? 'activo' : 'inactivo';
       db.ref(`usuarios/${id}/status`).set(newStatus)
