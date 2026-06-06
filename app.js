@@ -3,8 +3,8 @@
 // ==========================================
 const firebaseConfig = {
  apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
- authDomain: "piratas-tenerife.firebaseapp.com",
- databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app",
+ authDomain: "://firebaseapp.com",
+ databaseURL: "https://firebasedatabase.app",
  projectId: "piratas-tenerife",
  storageBucket: "piratas-tenerife.firebasestorage.app",
  messagingSenderId: "328725969132",
@@ -16,28 +16,13 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ==========================================
-// 2. FUNCIÓN DE DETECCIÓN DE RUTA FIABLE EN GITHUB PAGES
-// ==========================================
-function redirigirA(pagina) {
-  const loc = window.location;
-  // Obtiene el nombre del archivo actual del path (ej: index.html)
-  const currentFile = loc.pathname.substring(loc.pathname.lastIndexOf('/') + 1);
-  
-  if (currentFile === pagina) return; // Previene bucles infinitos de redirección
-
-  // Reemplaza el archivo actual por la página destino manteniendo la estructura exacta de subcarpetas
-  const newPath = loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1) + pagina;
-  loc.href = loc.origin + newPath;
-}
-
-// ==========================================
-// 3. CONTROL DE ACCESO Y SESIÓN LOCAL
+// 2. CONTROL DE ACCESO Y SESIÓN LOCAL (REDIRECCIÓN DIRECTA)
 // ==========================================
 const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
 
 if (!loguedUser) {
-  // Redirección inteligente corregida
-  redirigirA('login.html');
+  // CORREGIDO: Redirección directa por ruta relativa pura para evitar páginas en blanco
+  window.location.href = "login.html";
 } else {
   // Inyectar datos del jugador logueado en la interfaz
   if (document.getElementById('session-username')) {
@@ -58,7 +43,8 @@ if (!loguedUser) {
 function cerrarSesion() {
   if (confirm('¿Deseas cerrar tu sesión en el equipo?')) {
     localStorage.removeItem('softball_logged_user');
-    redirigirA('login.html');
+    // CORREGIDO: Redirección directa e inmediata tras remover la sesión
+    window.location.href = "login.html";
   }
 }
 
@@ -66,7 +52,7 @@ function cerrarSesion() {
 const PROXIMO_PARTIDO_ID = "partido_actual";
 
 // ==========================================
-// 4. ENVÍO DE ASISTENCIA A LA NUBE
+// 3. ENVÍO DE ASISTENCIA A LA NUBE
 // ==========================================
 function confirmAttendance(statusAsistencia) {
   if (!loguedUser) return;
@@ -85,7 +71,7 @@ function confirmAttendance(statusAsistencia) {
 }
 
 // ==========================================
-// 5. ESCUCHA ACTIVA DE ASISTENCIAS (TIEMPO REAL)
+// 4. ESCUCHA ACTIVA DE ASISTENCIAS (TIEMPO REAL)
 // ==========================================
 db.ref(`asistencias/${PROXIMO_PARTIDO_ID}`).on('value', (snapshot) => {
   const listYes = document.getElementById('list-yes');
@@ -122,7 +108,7 @@ db.ref(`asistencias/${PROXIMO_PARTIDO_ID}`).on('value', (snapshot) => {
 });
 
 // ==========================================
-// 6. CARGA DE LISTAS DINÁMICAS (TIEMPO REAL)
+// 5. CARGA DE LISTAS DINÁMICAS (TIEMPO REAL)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   
