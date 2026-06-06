@@ -39,37 +39,24 @@
     </div>
   </div>
 
+  <!-- LIBRERÍAS DE FIREBASE -->
   <script src="https://gstatic.com"></script>
   <script src="https://gstatic.com"></script>
 
   <script>
-    // REEMPLAZA ESTO CON TUS DATOS REALES DE FIREBASE
+    // CONFIGURACIÓN DE TU BASE DE DATOS
     const firebaseConfig = {
-      apiKey: "TU_API_KEY_AQUÍ",
-      authDomain: "TU_AUTH_DOMAIN_AQUÍ",
-      databaseURL: "TU_DATABASE_URL_AQUÍ",
-      projectId: "TU_PROJECT_ID_AQUÍ",
-      storageBucket: "TU_STORAGE_BUCKET_AQUÍ",
-      messagingSenderId: "TU_MESSAGING_SENDER_ID_AQUÍ",
-      appId: "TU_APP_ID_AQUÍ"
+      apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
+      authDomain: "://firebaseapp.com",
+      databaseURL: "https://firebasedatabase.app",
+      projectId: "piratas-tenerife",
+      storageBucket: "piratas-tenerife.firebasestorage.app",
+      messagingSenderId: "328725969132",
+      appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
-    // Función de ruteo inteligente idéntica
-    function redirigirA(pagina) {
-      const loc = window.location;
-      const pathArray = loc.pathname.split('/');
-      const isGitHubPages = loc.hostname.includes('github.io');
-      
-      if (isGitHubPages && pathArray.length > 2) {
-        const repoName = pathArray[1];
-        loc.href = `${loc.origin}/${repoName}/${pagina}`;
-      } else {
-        loc.href = `${loc.origin}/${pagina}`;
-      }
-    }
 
     function procesarLogin(e) {
       e.preventDefault();
@@ -80,6 +67,7 @@
       
       errorBox.style.display = 'none';
 
+      // Consultar tabla de usuarios en la nube
       db.ref('usuarios').once('value').then((snapshot) => {
         let listaUsuarios = [];
         
@@ -87,11 +75,6 @@
           snapshot.forEach((childSnapshot) => {
             listaUsuarios.push({ id: childSnapshot.key, ...childSnapshot.val() });
           });
-        } else {
-          listaUsuarios = [
-            { id: 'usr_1', name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' },
-            { id: 'usr_2', name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' }
-          ];
         }
 
         const usuarioEncontrado = listaUsuarios.find(u => u.name.toLowerCase() === txtName.toLowerCase());
@@ -114,6 +97,7 @@
           return;
         }
 
+        // Guardar la sesión local
         const sesionUsuario = {
           id: usuarioEncontrado.id,
           role: usuarioEncontrado.role,
@@ -122,16 +106,22 @@
         
         localStorage.setItem('softball_logged_user', JSON.stringify(sesionUsuario));
         
-        // Redirección inteligente corregida
-        redirigirA('index.html');
+        // CORREGIDO: Redirección directa por ruta relativa para evitar cuelgues en GitHub
+        window.location.href = "index.html";
+      })
+      .catch((error) => {
+        console.error("Error en Firebase:", error);
+        errorBox.textContent = "Error de conexión con la base de datos: " + error.message;
+        errorBox.style.display = 'block';
       });
     }
 
+    // Inicializar usuarios base si la base de datos está vacía por completo
     document.addEventListener('DOMContentLoaded', () => {
       db.ref('usuarios').once('value').then((snapshot) => {
         if (!snapshot.exists()) {
-          db.ref('usuarios/usr_1').set({ name: 'Administrador General', password: 'admin', phone: '000000000', birth: '1990-01-01', role: 'admin', status: 'activo' });
-          db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', phone: '111222333', birth: '1995-05-05', role: 'guest', status: 'activo' });
+          db.ref('usuarios/usr_1').set({ name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' });
+          db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' });
         }
       });
     });
