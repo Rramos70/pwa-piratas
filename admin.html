@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Softball Club - Admin Partidos</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#2E7D32">
+  <script>
+    // BLOQUEO DE SEGURIDAD INMEDIATO POR ROL
+    const session = JSON.parse(localStorage.getItem('softball_logged_user'));
+    if (!session || session.role !== 'admin') {
+      alert('Acceso denegado: Esta sección es exclusiva para administradores.');
+      window.location.href = 'index.html';
+    }
+  </script>
+</head>
+<body>
+
+  <div class="mobile-app-wrapper">
+    <header class="main-header">
+      <div class="header-container">
+        <h1><span aria-hidden="true">⚙️</span> Panel de Control</h1>
+        <p class="subtitle">Gestión de Partidos</p>
+      </div>
+    </header>
+
+    <main class="app-container">
+      <!-- FORMULARIO PARA CREAR/EDITAR PARTIDOS -->
+      <section class="card match-card" aria-label="Formulario de encuentro">
+        <div class="card-header">
+          <span class="pill-badge badge-warning" id="form-match-title">Programar Encuentro</span>
+        </div>
+        
+        <form id="match-form" class="action-box" style="display: flex; flex-direction: column; gap: 12px; padding: 15px 0;">
+          <input type="hidden" id="edit-match-id" value="">
+          
+          <div>
+            <label for="input-rival" class="info-label" style="display:block; margin-bottom:4px;">Nombre del Rival</label>
+            <input type="text" id="input-rival" class="modern-input" placeholder="Ej. Águilas del Norte" required>
+          </div>
+          <div>
+            <label for="input-tournament" class="info-label" style="display:block; margin-bottom:4px;">Torneo / Liga</label>
+            <input type="text" id="input-tournament" class="modern-input" placeholder="Ej. Torneo Apertura 2026" required>
+          </div>
+          <div>
+            <label for="input-stadium" class="info-label" style="display:block; margin-bottom:4px;">Estadio / Campo</label>
+            <input type="text" id="input-stadium" class="modern-input" placeholder="Ej. Estadio Central Campo 2" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label for="input-date" class="info-label" style="display:block; margin-bottom:4px;">Fecha</label>
+              <input type="date" id="input-date" class="modern-input" required>
+            </div>
+            <div>
+              <label for="input-time" class="info-label" style="display:block; margin-bottom:4px;">Hora</label>
+              <input type="time" id="input-time" class="modern-input" required>
+            </div>
+          </div>
+
+          <div>
+            <label for="select-condition" class="info-label" style="display:block; margin-bottom:4px;">Condición del Partido</label>
+            <select id="select-condition" class="modern-input" style="background-color: white;" required>
+              <option value="Local">🏟️ Local (Jugamos en casa)</option>
+              <option value="Visitante">🚌 Visitante (Viajamos)</option>
+            </select>
+          </div>
+          
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button type="submit" id="btn-submit-match" class="btn-vote btn-confirm" style="flex: 2;">💾 Guardar Partido</button>
+            <button type="button" id="btn-cancel-match-edit" class="btn-vote btn-decline" style="flex: 1; display: none;" onclick="cancelarEdicionPartido()">Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- LISTADO DE PARTIDOS REGISTRADOS -->
+      <section class="card lists-card" aria-label="Lista de partidos creadas">
+        <h4 class="list-title" style="margin-bottom:12px;">Historial y Próximos Encuentros</h4>
+        <ul id="admin-matches-list" class="modern-player-list" style="display:flex; flex-direction:column; gap:12px; padding:0;">
+          <!-- Se inyecta dinámicamente con JavaScript -->
+        </ul>
+      </section>
+    </main>
+
+    <!-- MENÚ DE NAVEGACIÓN -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true">🏠</span>
+        <span class="nav-label">Inicio</span>
+      </a>
+      <a href="admin.html" class="nav-item active" id="nav-link-admin">
+        <span class="nav-icon" aria-hidden="true">🗓️</span>
+        <span class="nav-label">Partidos</span>
+      </a>
+      <a href="usuarios.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true">👥</span>
+        <span class="nav-label">Usuarios</span>
+      </a>
+      <button type="button" class="nav-item" onclick="if(confirm('¿Deseas cerrar tu sesión en el equipo?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; }">
+        <span class="nav-icon" style="color:#c62828;" aria-hidden="true">🚪</span>
+        <span class="nav-label" style="color:#c62828;">Salir</span>
+      </button>
+    </nav>
+  </div>
+  <script>
+    let partidos = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      partidos = JSON.parse(localStorage.getItem('softball_matches')) || [];
+      document.getElementById('match-form').addEventListener('submit', guardarPartido);
+      renderAdminMatches();
+    });
+
+    // Función auxiliar para obtener el nombre del día en español basado en la fecha YYYY-MM-DD
+    function calcularDiaSemana(fechaString) {
+      if (!fechaString) return "-";
+      // Añadimos T00:00:00 para evitar desajustes de zona horaria local
+      const fechaObjeto = new Date(fechaString + 'T00:00:00');
+      if (isNaN(fechaObjeto)) return "-";
+      
+      const opciones = { weekday: 'long' };
+      const diaFormateado = new Intl.DateTimeFormat('es-ES', opciones).format(fechaObjeto);
+      // Retorna el día con la primera letra en mayúscula (ej. "Sábado")
+      return diaFormateado.charAt(0).toUpperCase() + diaFormateado.slice(1);
+    }
+
+    function guardarPartido(e) {
+      e.preventDefault();
+      
+      const idEditar = document.getElementById('edit-match-id').value;
+      const rival = document.getElementById('input-rival').value.trim();
+      const torneo = document.getElementById('input-tournament').value.trim();
+      const estadio = document.getElementById('input-stadium').value.trim();
+      const fecha = document.getElementById('input-date').value;
+      const hora = document.getElementById('input-time').value;
+      const condicion = document.getElementById('select-condition').value;
+      
+      // Cálculo automático del día
+      const diaCalculado = calcularDiaSemana(fecha);
+
+      if (idEditar) {
+        partidos = partidos.map(p => p.id === idEditar ? { ...p, rival, torneo, estadio, fecha, hora, dia: diaCalculado, condicion } : p);
+        alert('Partido modificado con éxito.');
+      } else {
+        const nuevoPartido = {
+          id: 'match_' + Date.now(),
+          rival,
+          torneo,
+          estadio,
+          fecha,
+          hora,
+          dia: diaCalculado,
+          condicion,
+          estado: 'por realizar',
+          scoreNosotros: 0,
+          scoreRival: 0
+        };
+        partidos.push(nuevoPartido);
+        alert('Partido programado con éxito.');
+      }
+
+      localStorage.setItem('softball_matches', JSON.stringify(partidos));
+      cancelarEdicionPartido();
+      renderAdminMatches();
+    }
+
+    function renderAdminMatches() {
+      const container = document.getElementById('admin-matches-list');
+      container.innerHTML = '';
+
+      if (partidos.length === 0) {
+        container.innerHTML = '<li style="text-align:center; color:#78909c; padding: 20px 0;">No hay partidos programados.</li>';
+        return;
+      }
+
+      partidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+      partidos.forEach(p => {
+        const esRealizado = p.estado === 'realizado';
+        const li = document.createElement('li');
+        const esLocal = p.condicion === 'Local';
+        
+        li.style.display = 'flex';
+        li.style.flexDirection = 'column';
+        li.style.gap = '10px';
+        li.style.padding = '12px';
+        li.style.background = '#f9f9f9';
+        li.style.borderRadius = '8px';
+        li.style.borderLeft = esRealizado ? '4px solid #2E7D32' : '4px solid #f57c00';
+
+        li.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <strong style="font-size:16px;">vs ${p.rival}</strong>
+              <!-- Muestra la condición de Local o Visitante -->
+              <span style="font-size: 11px; margin-left: 5px; padding: 2px 6px; border-radius: 4px; font-weight: bold; background: ${esLocal ? '#e8f5e9' : '#eceff1'}; color: ${esLocal ? '#2E7D32' : '#37474f'};">
+                ${p.condicion || 'Local'}
+              </span>
+              <small style="display:block; color:#666; margin-top:4px;">🏆 ${p.torneo} | 🏟️ ${p.estadio}</small>
+              <small style="display:block; color:#888;">📅 ${p.dia || '-'} ${p.fecha} a las ${p.hora} hs</small>
+            </div>
+            <span class="pill-badge ${esRealizado ? 'badge-success' : 'badge-warning'}" style="font-size:11px;">
+              ${p.estado}
+            </span>
+          </div>
+
+          ${esRealizado ? `
+            <div style="background:#e8f5e9; padding:8px 12px; border-radius:6px; display:flex; flex-direction:column; align-items:center; gap:6px; font-weight:bold;">
+              <div style="display:flex; gap:15px; font-size:15px;">
+                <span style="color:#2E7D32;">Nosotros: ${p.scoreNosotros}</span>
+                <span style="color:#555;">—</span>
+                <span style="color:#c62828;">Rival: ${p.scoreRival}</span>
+              </div>
+            </div>
+          ` : ''}
+
+          <div id="panel-score-${p.id}" style="display:none; background:#fff3e0; padding:10px; border-radius:6px; border:1px solid #ffe0b2;">
+            <p style="margin:0 0 8px 0; font-size:13px; font-weight:bold; color:#e65100;">Escribir resultado final:</p>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="number" id="score-us-${p.id}" min="0" placeholder="Nosotros" class="modern-input" value="${p.scoreNosotros}" style="padding:6px; text-align:center;">
+              <span>vs</span>
+              <input type="number" id="score-them-${p.id}" min="0" placeholder="Rival" class="modern-input" value="${p.scoreRival}" style="padding:6px; text-align:center;">
+              <button type="button" class="btn-vote btn-confirm" style="padding:6px 12px; font-size:13px;" onclick="guardarMarcadorFinal('${p.id}')">OK</button>
+            </div>
+          </div>
+          <!-- BOTONES DE GESTIÓN MÓVIL -->
+          <div style="display: flex; gap: 6px; justify-content: flex-end; border-top: 1px solid #eee; padding-top: 8px;">
+            <button type="button" class="btn-vote" style="padding: 4px 10px; font-size: 12px; background-color: #0288d1; color: white;" onclick="prepararEdicionPartido('${p.id}')">✏️ Editar Datos</button>
+            <button type="button" id="btn-toggle-${p.id}" class="btn-vote" style="padding: 4px 10px; font-size: 12px; background-color: #2E7D32; color: white;" onclick="mostrarPanelMarcador('${p.id}')">
+              ${esRealizado ? '🔄 Corregir Score' : '🏁 Finalizar Juego'}
+            </button>
+            <button type="button" class="btn-vote" style="padding: 4px 10px; font-size: 12px; background-color: #d32f2f; color: white;" onclick="eliminarPartido('${p.id}')">🗑️ Eliminar</button>
+          </div>
+        `;
+        container.appendChild(li);
+      });
+    }
+
+    function prepararEdicionPartido(id) {
+      const match = partidos.find(p => p.id === id);
+      if (!match) return;
+
+      document.getElementById('edit-match-id').value = match.id;
+      document.getElementById('input-rival').value = match.rival;
+      document.getElementById('input-tournament').value = match.torneo || match.tournament;
+      document.getElementById('input-stadium').value = match.estadio || match.stadium;
+      document.getElementById('input-date').value = match.fecha;
+      document.getElementById('input-time').value = match.hora;
+      document.getElementById('select-condition').value = match.condicion || "Local";
+
+      document.getElementById('form-match-title').textContent = "Modificar Datos del Partido";
+      document.getElementById('btn-submit-match').textContent = "💾 Actualizar Encuentro";
+      document.getElementById('btn-cancel-match-edit').style.display = 'block';
+      
+      document.getElementById('input-rival').focus();
+    }
+
+    function cancelarEdicionPartido() {
+      document.getElementById('match-form').reset();
+      document.getElementById('edit-match-id').value = "";
+      document.getElementById('form-match-title').textContent = "Programar Encuentro";
+      document.getElementById('btn-submit-match').textContent = "💾 Guardar Partido";
+      document.getElementById('btn-cancel-match-edit').style.display = 'none';
+    }
+
+    function mostrarPanelMarcador(id) {
+      const panel = document.getElementById(`panel-score-${id}`);
+      const boton = document.getElementById(`btn-toggle-${id}`);
+      const match = partidos.find(p => p.id === id);
+      
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        boton.textContent = '❌ Cancelar';
+        boton.style.backgroundColor = '#78909c';
+      } else {
+        panel.style.display = 'none';
+        boton.textContent = match.estado === 'realizado' ? '🔄 Corregir Score' : '🏁 Finalizar Juego';
+        boton.style.backgroundColor = '#2E7D32';
+      }
+    }
+
+    function guardarMarcadorFinal(id) {
+      const inputUs = document.getElementById(`score-us-${id}`);
+      const inputThem = document.getElementById(`score-them-${id}`);
+      
+      const scoreUs = parseInt(inputUs.value, 10);
+      const scoreThem = parseInt(inputThem.value, 10);
+
+      if (isNaN(scoreUs) || isNaN(scoreThem) || scoreUs < 0 || scoreThem < 0) {
+        alert('Introduce puntuaciones numéricas válidas.');
+        return;
+      }
+
+      partidos = partidos.map(p => {
+        if (p.id === id) {
+          return { ...p, estado: 'realizado', scoreNosotros: scoreUs, scoreRival: scoreThem };
+        }
+        return p;
+      });
+
+      localStorage.setItem('softball_matches', JSON.stringify(partidos));
+      renderAdminMatches();
+      alert('Marcador actualizado correctamente.');
+    }
+
+    function eliminarPartido(id) {
+      if (confirm('¿Deseas eliminar este partido permanentemente?')) {
+        partidos = partidos.filter(p => p.id !== id);
+        localStorage.setItem('softball_matches', JSON.stringify(partidos));
+        renderAdminMatches();
+      }
+    }
+  </script>
+</body>
+</html>

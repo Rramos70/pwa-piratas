@@ -1,0 +1,551 @@
+/* ==========================================
+   1. VARIABLES GLOBALES Y CONFIGURACIÓN GENERAL
+   ========================================== */
+:root {
+  --primary-color: #2e7d32;
+  --primary-hover: #1b5e20;
+  --bg-color: #f0f4f1;
+  --card-bg: #ffffff;
+  --text-main: #2c3e50;
+  --text-muted: #78909c;
+  --border-color: #e9edf0;
+  
+  --badge-pending-bg: #fff3e0;
+  --badge-pending-text: #ef6c00;
+  --badge-done-bg: #e8f5e9;
+  --badge-done-text: #2e7d32;
+  
+  --btn-edit: #3498db;
+  --btn-delete: #c62828;
+  --btn-cancel: #90a4ae;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+/* Cabecera Estilo PWA */
+.main-header {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
+  color: white;
+  text-align: center;
+  padding: 25px 15px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.main-header h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Contenedores Principales */
+main, .app-container {
+  padding: 15px;
+  max-width: 800px;
+  margin: -15px auto 30px auto;
+  box-sizing: border-box;
+}
+
+/* Estructura de Tarjetas (Cards) */
+.card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0,0,0,0.02);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f2;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin-top: 0;
+  color: var(--text-main);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ==========================================
+   2. ESTILOS DE FORMULARIOS (ADMINISTRACIÓN)
+   ========================================== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #4a5568;
+}
+
+input, select, .modern-input {
+  padding: 11px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+  color: var(--text-main);
+  background-color: #fff;
+  transition: border-color 0.2s;
+}
+
+input:focus, select:focus, .modern-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+input:disabled {
+  background-color: #edf2f7;
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border-color: #e2e8f0;
+}
+
+.score-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.score-group input {
+  width: 70px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Botones Principales */
+.btn {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 15px;
+  transition: background 0.2s ease;
+}
+
+.btn-yes { background-color: var(--primary-color); color: white; }
+.btn-yes:hover { background-color: var(--primary-hover); }
+.btn-cancel { background-color: var(--btn-cancel); color: white; margin-top: 8px; }
+
+/* ==========================================
+   3. MARCADORES Y VISTA PÚBLICA (JUGADOR)
+   ========================================== */
+.pill-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-success { background-color: var(--badge-done-bg); color: var(--badge-done-text); }
+.badge-warning { background-color: var(--badge-pending-bg); color: var(--badge-pending-text); }
+
+.tournament-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Diseño del Marcador de Resultados */
+.scoreboard-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.scoreboard-team {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.team-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #546e7a;
+  margin-bottom: 6px;
+}
+
+.team-score {
+  font-size: 42px;
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.score-win { color: var(--primary-color); }
+.scoreboard-vs { font-weight: 800; color: #b0bec5; font-size: 14px; padding: 0 15px; }
+
+/* Distribución de Datos del Partido */
+.match-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.info-item { display: flex; flex-direction: column; }
+.info-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+.info-value { font-size: 15px; font-weight: 600; color: #37474f; }
+.highlight-text { color: var(--primary-color); font-weight: 700; }
+.info-subvalue { font-size: 12px; color: var(--text-muted); }
+
+/* Caja de Confirmación de Asistencia */
+.attendance-wrapper {
+  background: #f8faf9;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px dashed #c8e6c9;
+}
+
+.attendance-wrapper h3 { margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: var(--primary-color); }
+.modern-input { width: 100%; margin-bottom: 12px; }
+.attendance-buttons { display: flex; gap: 10px; }
+
+.btn-vote {
+  flex: 1; padding: 12px; border: none; border-radius: 8px;
+  font-weight: 700; font-size: 14px; cursor: pointer; transition: transform 0.1s;
+}
+.btn-vote:active { transform: scale(0.98); }
+.btn-confirm { background-color: var(--primary-color); color: white; }
+.btn-decline { background-color: #cfd8dc; color: #455a64; }
+
+/* Dos columnas para Listas de Asistencia */
+.attendance-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.list-title {
+  margin: 0 0 10px 0; font-size: 13px; font-weight: 700;
+  text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;
+}
+.title-yes { color: var(--primary-color); }
+.title-no { color: var(--btn-delete); }
+
+.counter { padding: 2px 8px; border-radius: 10px; font-size: 11px; color: white; }
+.title-yes .counter { background-color: var(--primary-color); }
+.title-no .counter { background-color: var(--btn-delete); }
+
+.modern-player-list { list-style: none; padding: 0; margin: 0; }
+.modern-player-list li {
+  background: #f8fafc; padding: 8px 12px; margin-bottom: 6px;
+  border-radius: 6px; font-size: 14px; font-weight: 500; border: 1px solid #e9edf0;
+}
+.list-style-yes li { border-left: 3px solid var(--primary-color); }
+.list-style-no li { border-left: 3px solid var(--btn-delete); color: #546e7a; }
+
+/* ==========================================
+   4. TABLA DE CONTROL ADAPTIVA (RESPONSIVE)
+   ========================================== */
+.table-responsive { width: 100%; margin-top: 10px; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+th, td { padding: 14px 12px; border-bottom: 1px solid #e2e8f0; }
+
+th {
+  background-color: #f8fafc; color: #4a5568; font-weight: 700;
+  text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;
+}
+
+tr:hover { background-color: #f8fafc; }
+
+/* Modificadores de la Tabla */
+.badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-block; }
+.badge-pending { background-color: var(--badge-pending-bg); color: var(--badge-pending-text); }
+.badge-done { background-color: var(--badge-done-bg); color: var(--badge-done-text); }
+
+.actions { display: flex; gap: 6px; }
+.btn-action {
+  padding: 8px 10px; border: none; border-radius: 6px; font-size: 14px;
+  cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center;
+}
+.btn-edit { background-color: var(--btn-edit); }
+.btn-delete { background-color: var(--btn-delete); }
+
+/* --- TRANSFORMACIÓN CARD PARA SMARTPHONES --- */
+@media (max-width: 650px) {
+  table, thead, tbody, th, td, tr { display: block; }
+  thead tr { position: absolute; top: -9999px; left: -9999px; }
+  
+  tr {
+    margin-bottom: 15px; border: 1px solid #e2e8f0;
+    border-radius: 8px; background: #ffffff; padding: 8px;
+  }
+  
+  td {
+    border: none; border-bottom: 1px solid #edf2f7;
+    position: relative; padding-left: 45%; text-align: right; min-height: 24px;
+  }
+  td:last-child { border-bottom: none; }
+  
+  td::before {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 40%; text-align: left; font-weight: bold; color: #4a5568;
+    font-size: 11px; text-transform: uppercase;
+  }
+  
+  td:nth-of-type(1)::before { content: "Torneo"; }
+  td:nth-of-type(2)::before { content: "Rival"; }
+  td:nth-of-type(3)::before { content: "Fecha / Día"; }
+  td:nth-of-type(4)::before { content: "Hora"; }
+  td:nth-of-type(5)::before { content: "Estadio"; }
+  td:nth-of-type(6)::before { content: "Estado"; }
+  td:nth-of-type(7)::before { content: "Score"; }
+  td:nth-of-type(8)::before { content: "Acciones"; }
+
+  .actions { justify-content: flex-end; }
+}
+/* --- FORMATO APLICACIÓN MÓVIL (NAV BAR INFERIOR) --- */
+
+/* Contenedor tipo cascarón para limitar ancho en PC y ser nativo en móvil */
+.mobile-app-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #f0f4f1;
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 75px; /* Espacio para que la barra inferior no tape el contenido */
+  box-shadow: 0 0 30px rgba(0,0,0,0.05);
+}
+
+/* Control de visibilidad de pantallas de la app */
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* Barra Inferior Fija */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  height: 65px;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+  z-index: 999;
+  padding-bottom: env(safe-area-inset-bottom); /* Soporte para la barra inferior de iPhones modernos */
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  cursor: pointer;
+  color: #78909c;
+  transition: color 0.2s ease;
+}
+
+.nav-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Estado activo del botón presionado */
+.nav-item.active {
+  color: #2e7d32;
+}
+
+.nav-item.active .nav-icon {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+/* Ajustes de scroll en móviles */
+html, body {
+  overscroll-behavior-y: contain; /* Previene el molesto efecto rebote al recargar en Chrome/Safari móvil */
+}
+/* --- ADAPTACIÓN DE TABLA DE USUARIOS PARA SMARTPHONES --- */
+@media (max-width: 650px) {
+  #users-table, #users-table thead, #users-table tbody, #users-table th, #users-table td, #users-table tr {
+    display: block;
+  }
+  #users-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  #users-table td:nth-of-type(1)::before { content: "Nombre"; }
+  #users-table td:nth-of-type(2)::before { content: "Teléfono"; }
+  #users-table td:nth-of-type(3)::before { content: "Correo"; }
+  #users-table td:nth-of-type(4)::before { content: "Rol"; }
+  #users-table td:nth-of-type(5)::before { content: "Acciones"; }
+}
+:root {
+  --primary-color: #2e7d32; --primary-hover: #1b5e20; --bg-color: #f0f4f1; --card-bg: #ffffff;
+  --text-main: #2c3e50; --text-muted: #78909c; --border-color: #e9edf0;
+  --badge-pending-bg: #fff3e0; --badge-pending-text: #ef6c00;
+  --badge-done-bg: #e8f5e9; --badge-done-text: #2e7d32;
+  --btn-edit: #3498db; --btn-delete: #c62828; --btn-cancel: #90a4ae;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); line-height: 1.5; overscroll-behavior-y: contain; }
+
+.mobile-app-wrapper { max-width: 600px; margin: 0 auto; background-color: #f0f4f1; min-height: 100vh; position: relative; padding-bottom: 75px; box-shadow: 0 0 30px rgba(0,0,0,0.05); }
+.main-header { background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%); color: white; text-align: center; padding: 25px 15px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+.main-header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.subtitle { margin: 4px 0 0 0; font-size: 13px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+
+.app-container { padding: 15px; box-sizing: border-box; }
+.card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.03); border: 1px solid rgba(0,0,0,0.02); }
+.card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f2; padding-bottom: 12px; margin-bottom: 16px; }
+h2 { margin-top: 0; color: var(--text-main); font-size: 18px; font-weight: 700; }
+
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+.input-group { display: flex; flex-direction: column; }
+label { font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #4a5568; }
+input, select { padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; box-sizing: border-box; color: var(--text-main); background-color: #fff; }
+input:focus, select:focus { outline: none; border-color: var(--primary-color); }
+input:disabled { background-color: #edf2f7; color: var(--text-muted); cursor: not-allowed; border-color: #e2e8f0; }
+
+.score-group { display: flex; gap: 10px; align-items: center; }
+.score-group input { width: 70px; text-align: center; font-weight: bold; }
+.btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; width: 100%; margin-top: 15px; }
+.btn-yes { background-color: var(--primary-color); color: white; }
+.btn-cancel { background-color: var(--btn-cancel); color: white; margin-top: 8px; }
+
+.pill-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.badge-success { background-color: var(--badge-done-bg); color: var(--badge-done-text); }
+.badge-warning { background-color: var(--badge-pending-bg); color: var(--badge-pending-text); }
+.tournament-text { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+.scoreboard-wrapper { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+.scoreboard-team { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.team-name { font-size: 15px; font-weight: 700; color: #546e7a; margin-bottom: 6px; }
+.team-score { font-size: 42px; font-weight: 900; color: var(--text-main); line-height: 1; }
+.score-win { color: var(--primary-color); }
+.scoreboard-vs { font-weight: 800; color: #b0bec5; font-size: 14px; padding: 0 15px; }
+
+.match-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.info-item { display: flex; flex-direction: column; }
+.info-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.5px; }
+.info-value { font-size: 15px; font-weight: 600; color: #37474f; }
+.highlight-text { color: var(--primary-color); font-weight: 700; }
+.info-subvalue { font-size: 12px; color: var(--text-muted); }
+
+.attendance-wrapper { background: #f8faf9; border-radius: 12px; padding: 16px; border: 1px dashed #c8e6c9; }
+.attendance-wrapper h3 { margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: var(--primary-color); }
+.attendance-buttons { display: flex; gap: 10px; }
+.btn-vote { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; }
+.btn-confirm { background-color: var(--primary-color); color: white; }
+.btn-decline { background-color: #cfd8dc; color: #455a64; }
+
+.attendance-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.list-title { margin: 0 0 10px 0; font-size: 13px; font-weight: 700; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+.title-yes { color: var(--primary-color); } .title-no { color: var(--btn-delete); }
+.counter { padding: 2px 8px; border-radius: 10px; font-size: 11px; color: white; }
+.title-yes .counter { background-color: var(--primary-color); } .title-no .counter { background-color: var(--btn-delete); }
+.modern-player-list { list-style: none; padding: 0; margin: 0; }
+.modern-player-list li { background: #f8fafc; padding: 8px 12px; margin-bottom: 6px; border-radius: 6px; font-size: 14px; font-weight: 500; border: 1px solid #e9edf0; }
+.list-style-yes li { border-left: 3px solid var(--primary-color); }
+.list-style-no li { border-left: 3px solid var(--btn-delete); color: #546e7a; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; height: 65px; background-color: #ffffff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #e0e0e0; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); z-index: 999; padding-bottom: env(safe-area-inset-bottom); }
+.nav-item { background: none; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; cursor: pointer; color: #78909c; }
+.nav-icon { font-size: 20px; margin-bottom: 2px; }
+.nav-label { font-size: 11px; font-weight: 700; }
+.nav-item.active { color: #2e7d32; }
+
+.table-responsive { width: 100%; margin-top: 10px; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+th, td { padding: 14px 12px; border-bottom: 1px solid #e2e8f0; }
+th { background-color: #f8fafc; color: #4a5568; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+.badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-block; }
+.badge-pending { background-color: var(--badge-pending-bg); color: var(--badge-pending-text); }
+.badge-done { background-color: var(--badge-done-bg); color: var(--badge-done-text); }
+.actions { display: flex; gap: 6px; }
+.btn-action { padding: 8px 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; }
+.btn-edit { background-color: var(--btn-edit); } .btn-delete { background-color: var(--btn-delete); }
+
+@media (max-width: 650px) {
+  table, thead, tbody, th, td, tr { display: block; }
+  thead tr { position: absolute; top: -9999px; left: -9999px; }
+  tr { margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; padding: 8px; }
+  td { border: none; border-bottom: 1px solid #edf2f7; position: relative; padding-left: 45%; text-align: right; min-height: 24px; }
+  td:last-child { border-bottom: none; }
+  td::before { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 40%; text-align: left; font-weight: bold; color: #4a5568; font-size: 11px; text-transform: uppercase; }
+  td:nth-of-type(1)::before { content: "Torneo / Info"; }
+  td:nth-of-type(2)::before { content: "Rival / Tel"; }
+  td:nth-of-type(3)::before { content: "Fecha / Correo"; }
+  td:nth-of-type(4)::before { content: "Hora / Rol"; }
+  td:nth-of-type(5)::before { content: "Estadio / Accion"; }
+  td:nth-of-type(6)::before { content: "Estado"; }
+  td:nth-of-type(7)::before { content: "Score"; }
+  td:nth-of-type(8)::before { content: "Acciones"; }
+  .actions { justify-content: flex-end; }
+}
+/* Oculta elementos visualmente pero los mantiene accesibles para lectores de pantalla */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

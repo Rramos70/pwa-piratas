@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Softball Club - Inicio</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#2E7D32">
+</head>
+<body>
+
+  <div class="mobile-app-wrapper">
+    <header class="main-header">
+      <div class="header-container" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1><span aria-hidden="true">🥎</span> Softball Club</h1>
+          <p class="subtitle">Temporada 2026</p>
+        </div>
+        <div id="user-profile-badge" style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; text-align: right;">
+          👋 Hola, <span id="session-username">...</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-container">
+      
+      <!-- ÚLTIMO RESULTADO -->
+      <section class="card result-card" id="last-result-card" style="display: none;" aria-label="Último resultado del partido">
+        <div class="card-header">
+          <span class="pill-badge badge-success">Último Partido</span>
+          <span id="result-tournament" class="tournament-text">-</span>
+        </div>
+        <div class="scoreboard-wrapper">
+          <div class="scoreboard-team">
+            <span class="team-name">Nosotros</span>
+            <span class="team-score score-win" id="score-us">0</span>
+          </div>
+          <div class="scoreboard-vs">VS</div>
+          <div class="scoreboard-team">
+            <span class="team-name" id="result-rival-name">Rival</span>
+            <span class="team-score" id="score-them">0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRÓXIMO PARTIDO -->
+      <section class="card match-card" id="next-match-card" aria-label="Información del próximo partido">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span class="pill-badge badge-warning" id="match-status-title">Próximo Partido</span>
+            <span id="next-tournament" class="tournament-text">-</span>
+          </div>
+          <span id="next-condition" class="pill-badge" style="font-weight: bold; text-transform: uppercase;">-</span>
+        </div>
+        
+        <div id="match-details" class="match-info-grid">
+          <div class="info-item"><span class="info-label">Rival</span><span class="info-value highlight-text" id="next-rival">-</span></div>
+          <div class="info-item"><span class="info-label">Fecha y Día</span><span class="info-value" id="next-date">-</span><span class="info-subvalue" id="next-day">-</span></div>
+          <div class="info-item"><span class="info-label">Hora</span><span class="info-value" id="next-time">-</span></div>
+          <div class="info-item"><span class="info-label">Estadio</span><span class="info-value" id="next-stadium">-</span></div>
+        </div>
+
+        <!-- ASISTENCIA SEGURA -->
+        <div id="attendance-zone" class="attendance-wrapper">
+          <h3><span aria-hidden="true">⚡</span> ¿Cuentan contigo para el juego?</h3>
+          <form id="attendance-form" onsubmit="event.preventDefault();" class="action-box">
+            <input type="text" id="player-name" class="modern-input" readonly style="background-color: #f5f5f5; color: #555; cursor: not-allowed; font-weight: bold;">
+            <div class="attendance-buttons">
+              <button type="button" class="btn-vote btn-confirm" onclick="confirmAttendance(true)">👍 Sí, juego</button>
+              <button type="button" class="btn-vote btn-decline" onclick="confirmAttendance(false)">👎 No puedo</button>
+            </div>
+          </form>
+        </div>
+      </section>
+      <!-- LISTAS DE CONFIRMACIÓN -->
+      <section class="card lists-card" id="lists-card" aria-label="Listas de asistencia">
+        <div class="attendance-split">
+          <div class="list-column">
+            <h4 class="list-title title-yes">Confirmados <span class="counter" id="count-yes">0</span></h4>
+            <ul id="list-yes" class="modern-player-list list-style-yes"></ul>
+          </div>
+          <div class="list-column">
+            <h4 class="list-title title-no">Bajas <span class="counter" id="count-no">0</span></h4>
+            <ul id="list-no" class="modern-player-list list-style-no"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN DE CUMPLEAÑEROS (AHORA ABAJO) -->
+      <section class="card lists-card" id="birthday-card" aria-label="Cumpleañeros del mes">
+        <div class="card-header">
+          <span class="pill-badge" id="birthday-title" style="background-color: #0288d1; color: white;">🎂 Cumpleaños del Mes</span>
+        </div>
+        <ul id="birthday-list" class="modern-player-list" style="padding: 10px 0 0 0; display: flex; flex-direction: column; gap: 6px;">
+          <!-- Se inyecta con JavaScript -->
+        </ul>
+      </section>
+
+    </main>
+          <!-- SECCIÓN DE HISTORIAL DE PARTIDOS REALIZADOS -->
+      <section class="card lists-card" id="history-matches-card" aria-label="Historial de partidos realizados">
+        <div class="card-header">
+          <span class="pill-badge" style="background-color: #37474f; color: white;">📋 Historial de Partidos</span>
+        </div>
+        <ul id="history-matches-list" class="modern-player-list" style="padding: 10px 0 0 0; display: flex; flex-direction: column; gap: 8px;">
+          <!-- Se inyecta dinámicamente con JavaScript -->
+        </ul>
+      </section>
+      <!-- SECCIÓN DE PRÓXIMOS ENCUENTROS (HISTORIAL COMPLETO POR REALIZAR) -->
+      <section class="card lists-card" id="upcoming-matches-card" aria-label="Partidos por realizar">
+        <div class="card-header">
+          <span class="pill-badge" style="background-color: #f57c00; color: white;">🗓️ Agenda de Partidos</span>
+        </div>
+        <ul id="upcoming-matches-list" class="modern-player-list" style="padding: 10px 0 0 0; display: flex; flex-direction: column; gap: 8px;">
+          <!-- Se inyecta dinámicamente con JavaScript -->
+        </ul>
+      </section>
+
+
+    <!-- MENÚ DE NAVEGACIÓN -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item active">
+        <span class="nav-icon" aria-hidden="true">🏠</span>
+        <span class="nav-label">Inicio</span>
+      </a>
+      <a href="admin.html" class="nav-item" id="nav-link-admin">
+        <span class="nav-icon" aria-hidden="true">🗓️</span>
+        <span class="nav-label">Partidos</span>
+      </a>
+      <a href="usuarios.html" class="nav-item" id="nav-link-users">
+        <span class="nav-icon" aria-hidden="true">👥</span>
+        <span class="nav-label">Usuarios</span>
+      </a>
+      <button type="button" class="nav-item" onclick="if(confirm('¿Deseas cerrar tu sesión en el equipo?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; }">
+        <span class="nav-icon" style="color:#c62828;" aria-hidden="true">🚪</span>
+        <span class="nav-label" style="color:#c62828;">Salir</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

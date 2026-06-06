@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Softball Club - Iniciar Sesión</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#2E7D32">
+  <style>
+    .login-container { max-width: 400px; margin: 40px auto; padding: 20px; text-align: center; }
+    .form-group { text-align: left; margin-bottom: 15px; }
+    .btn-login { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; background-color: #2E7D32; color: white; }
+    .error-msg { color: #d32f2f; font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="mobile-app-wrapper">
+    <div class="card login-container">
+      <h1><span aria-hidden="true">🥎</span> Softball Club</h1>
+      <p style="color: #555; margin-bottom: 20px;">Introduce tus credenciales para acceder</p>
+      
+      <form id="login-form" onsubmit="procesarLogin(event)">
+        <div class="form-group">
+          <label for="login-name" class="info-label" style="display:block; margin-bottom:4px;">Nombre y Apellido</label>
+          <input type="text" id="login-name" class="modern-input" placeholder="Ej. Juan Pérez" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="login-password" class="info-label" style="display:block; margin-bottom:4px;">Contraseña</label>
+          <input type="password" id="login-password" class="modern-input" placeholder="••••••••" required>
+        </div>
+        
+        <button type="submit" class="btn-login">🔑 Entrar al Equipo</button>
+        <div id="error-box" class="error-msg"></div>
+      </form>
+    </div>
+  </div>
+  <script>
+    function procesarLogin(e) {
+      e.preventDefault();
+      
+      const txtName = document.getElementById('login-name').value.trim();
+      const txtPassword = document.getElementById('login-password').value;
+      const errorBox = document.getElementById('error-box');
+      
+      // Ocultar mensaje de error previo
+      errorBox.style.display = 'none';
+
+      // 1. Obtener los usuarios reales del sistema
+      const listaUsuarios = JSON.parse(localStorage.getItem('softball_users_list')) || [
+        { id: 'usr_1', name: 'Administrador General', password: 'admin', phone: '000000000', birth: '1990-01-01', role: 'admin', status: 'activo' },
+        { id: 'usr_2', name: 'Invitado de Pruebas', password: 'guest', phone: '111222333', birth: '1995-05-05', role: 'guest', status: 'activo' }
+      ];
+
+      // 2. Buscar coincidencia exacta (ignorando mayúsculas y minúsculas en el nombre)
+      const usuarioEncontrado = listaUsuarios.find(u => u.name.toLowerCase() === txtName.toLowerCase());
+
+      // 3. Validaciones estrictas de seguridad
+      if (!usuarioEncontrado) {
+        errorBox.textContent = "El usuario ingresado no está registrado.";
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      if (usuarioEncontrado.password !== txtPassword) {
+        errorBox.textContent = "La contraseña es incorrecta.";
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      if (usuarioEncontrado.status === 'inactivo') {
+        errorBox.textContent = "Tu cuenta está desactivada. Contacta al administrador.";
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      // 4. Guardar sesión activa con los datos del usuario real
+      const sesionUsuario = {
+        id: usuarioEncontrado.id,
+        role: usuarioEncontrado.role,
+        name: usuarioEncontrado.name
+      };
+      
+      localStorage.setItem('softball_logged_user', JSON.stringify(sesionUsuario));
+      
+      // Redirigir a la pantalla principal
+      window.location.href = 'index.html';
+    }
+
+    // Asegurar que la lista de usuarios base exista al cargar la página por primera vez
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!localStorage.getItem('softball_users_list')) {
+        const usuariosBase = [
+          { id: 'usr_1', name: 'Administrador General', password: 'admin', phone: '000000000', birth: '1990-01-01', role: 'admin', status: 'activo' },
+          { id: 'usr_2', name: 'Invitado de Pruebas', password: 'guest', phone: '111222333', birth: '1995-05-05', role: 'guest', status: 'activo' }
+        ];
+        localStorage.setItem('softball_users_list', JSON.stringify(usuariosBase));
+      }
+    });
+  </script>
+</body>
+</html>

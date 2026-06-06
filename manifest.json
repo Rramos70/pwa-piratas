@@ -1,0 +1,16 @@
+{
+  "name": "Softball Team PWA",
+  "short_name": "SoftballApp",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://flaticon.com",
+      "sizes": "512512",
+      "type": "image/png"
+    }
+  ]
+}
