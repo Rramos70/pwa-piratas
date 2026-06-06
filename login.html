@@ -1,22 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Piratas de Tenerife - Iniciar Sesión</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#2E7D32">
+  <style>
+    .login-container { max-width: 400px; margin: 40px auto; padding: 20px; text-align: center; }
+    .form-group { text-align: left; margin-bottom: 15px; }
+    .btn-login { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; background-color: #2E7D32; color: white; }
+    .error-msg { color: #d32f2f; font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="mobile-app-wrapper">
+    <div class="card login-container">
+      <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+        <img src="logop.png" alt="Logotipo de Piratas de Tenerife" style="width: 65px; height: 65px; object-fit: contain;">
+      </div>
+      <h1><span aria-hidden="true">🥎</span> PIRATAS DE TENERIFE</h1>
+      <p style="color: #555; margin-bottom: 20px;">Introduce tus credenciales para acceder</p>
+      
+      <form id="login-form" onsubmit="procesarLogin(event)">
+        <div class="form-group">
+          <label for="login-name" class="info-label" style="display:block; margin-bottom:4px;">Nombre y Apellido</label>
+          <input type="text" id="login-name" class="modern-input" placeholder="Ej. Administrador General" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="login-password" class="info-label" style="display:block; margin-bottom:4px;">Contraseña</label>
+          <input type="password" id="login-password" class="modern-input" placeholder="••••••••" required>
+        </div>
+        
+        <button type="submit" class="btn-login">🔑 Entrar al Equipo</button>
+        <div id="error-box" class="error-msg"></div>
+      </form>
+    </div>
+  </div>
+
   <!-- ================================================================= -->
-  <!-- LIBRERÍAS DE FIREBASE CORREGIDAS (Compatibles con sintaxis v8)   -->
+  <!-- PASO 1: CARGAR PRIMERO LAS LIBRERÍAS (OBLIGATORIO)              -->
   <!-- ================================================================= -->
   <script src="https://gstatic.com"></script>
   <script src="https://gstatic.com"></script>
 
+  <!-- ================================================================= -->
+  <!-- PASO 2: INICIALIZAR Y OPERAR (DESPUÉS DE QUE EXISTE FIREBASE)    -->
+  <!-- ================================================================= -->
   <script>
-    // Configuración corregida y saneada
+    // Configuración limpia
     const firebaseConfig = {
       apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
-      authDomain: "piratas-tenerife.firebaseapp.com", // CORREGIDO
-      databaseURL: "https://firebasedatabase.app",     // NOTA: Asegúrate en tu consola que esta sea la URL exacta
+      authDomain: "://firebaseapp.com",
+      databaseURL: "https://firebasedatabase.app", // NOTA: Cambia esto por tu URL de Firebase Realtime si es diferente
       projectId: "piratas-tenerife",
       storageBucket: "piratas-tenerife.firebasestorage.app",
       messagingSenderId: "328725969132",
       appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
     };
 
-    // Inicialización segura de Firebase
+    // Inicialización segura garantizada
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
@@ -81,8 +125,10 @@
       db.ref('usuarios').once('value').then((snapshot) => {
         if (!snapshot.exists()) {
           db.ref('usuarios/usr_1').set({ name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' });
-          db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' }); // Saneada propiedad duplicada
+          db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' });
         }
       }).catch(err => console.error("Error al inicializar usuarios base:", err));
     });
   </script>
+</body>
+</html>
