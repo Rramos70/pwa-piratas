@@ -25,7 +25,7 @@
       <form id="login-form" onsubmit="procesarLogin(event)">
         <div class="form-group">
           <label for="login-name" class="info-label" style="display:block; margin-bottom:4px;">Nombre y Apellido</label>
-          <input type="text" id="login-name" class="modern-input" placeholder="Ej. Juan Pérez" required>
+          <input type="text" id="login-name" class="modern-input" placeholder="Ej. Administrador General" required>
         </div>
         
         <div class="form-group">
@@ -44,7 +44,6 @@
   <script src="https://gstatic.com"></script>
 
   <script>
-    // CONFIGURACIÓN DE TU BASE DE DATOS
     const firebaseConfig = {
       apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
       authDomain: "://firebaseapp.com",
@@ -67,7 +66,6 @@
       
       errorBox.style.display = 'none';
 
-      // Consultar tabla de usuarios en la nube
       db.ref('usuarios').once('value').then((snapshot) => {
         let listaUsuarios = [];
         
@@ -97,7 +95,6 @@
           return;
         }
 
-        // Guardar la sesión local
         const sesionUsuario = {
           id: usuarioEncontrado.id,
           role: usuarioEncontrado.role,
@@ -106,22 +103,22 @@
         
         localStorage.setItem('softball_logged_user', JSON.stringify(sesionUsuario));
         
-        // CORREGIDO: Redirección directa por ruta relativa para evitar cuelgues en GitHub
+        // Redirección directa limpia
         window.location.href = "index.html";
       })
       .catch((error) => {
         console.error("Error en Firebase:", error);
-        errorBox.textContent = "Error de conexión con la base de datos: " + error.message;
+        errorBox.textContent = "Error: " + error.message;
         errorBox.style.display = 'block';
       });
     }
 
-    // Inicializar usuarios base si la base de datos está vacía por completo
     document.addEventListener('DOMContentLoaded', () => {
+      // Verificar e inyectar cuentas por defecto si la base de datos está vacía
       db.ref('usuarios').once('value').then((snapshot) => {
         if (!snapshot.exists()) {
           db.ref('usuarios/usr_1').set({ name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' });
-          db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' });
+          db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', password: 'guest', role: 'guest', status: 'activo' });
         }
       });
     });
