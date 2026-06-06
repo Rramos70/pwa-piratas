@@ -149,10 +149,11 @@
   <!-- ================================================================= -->
   <!-- 1. LIBRERÍAS DE FIREBASE OBLIGATORIAS (Carga prioritaria)         -->
   <!-- ================================================================= -->
-  <!-- ❌ ESTO DA ERROR 404 Y ROMPE TU APP -->
-<script src="https://gstatic.com"></script>
-<script src="https://gstatic.com"></script>
-
+  <!-- Firebase SDK para la autenticación -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <!-- Firebase SDK para la Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   
   <!-- ================================================================= -->
   <!-- 2. SCRIPT DE LÓGICA GENERAL (Se ejecuta tras Firebase)           -->

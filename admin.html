@@ -19,8 +19,12 @@
   <!-- ================================================================= -->
   <!-- 1. LIBRERÍAS DE FIREBASE OBLIGATORIAS (Carga prioritaria)         -->
   <!-- ================================================================= -->
-  <script src="https://gstatic.com"></script>
-  <script src="https://gstatic.com"></script>
+  <!-- Core Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <!-- Firebase Authentication SDK (essential for secure access control) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <!-- Firebase Realtime Database SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="mobile-app-wrapper">
@@ -92,70 +96,125 @@
   <!-- 2. LÓGICA DE NEGOCIO CONTROLADA                                  -->
   <!-- ================================================================= -->
   <script>
-    // Control de acceso inmediato por rol corporativo
-    const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
-    if (!loguedUser || loguedUser.role !== 'admin') {
-      alert("Acceso denegado. Se requieren permisos de Administrador.");
-      window.location.href = "index.html";
-    }
+    // =======================================================================================================
+    // ATENCIÓN CRÍTICA DE SEGURIDAD:
+    // El control de acceso basado únicamente en localStorage es EXTREMADAMENTE INSEGURO.
+    // Un usuario puede modificar fácilmente 'softball_logged_user' en su navegador para simular ser un admin.
+    // Para una aplicación real, DEBES usar Firebase Authentication junto con Firebase Realtime Database Security Rules
+    // para controlar el acceso a funciones y datos sensibles basados en el rol del usuario autenticado.
+    // =======================================================================================================
 
-    // Configuración con tu URL exacta de Europa
+    // Variables globales para Firebase
+    let db;
+    let auth; // Se añade la referencia a Firebase Authentication
+
+    // Configuración oficial de tu proyecto
     const firebaseConfig = {
       apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
-      authDomain: "://firebaseapp.com",
-      databaseURL: "https://firebasedatabase.app",
+      authDomain: "piratas-tenerife.firebaseapp.com", // CORREGIDO
+      databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app/", // CORREGIDO
       projectId: "piratas-tenerife",
       storageBucket: "piratas-tenerife.firebasestorage.app",
       messagingSenderId: "328725969132",
       appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
     };
 
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    // Inicialización de Firebase
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      db = firebase.database();
+      auth = firebase.auth(); // Inicializamos Firebase Authentication
+    } catch (e) {
+      console.error("Fallo crítico al inicializar Firebase. Revisa la caché del navegador.", e);
+    }
+
+    // Control de acceso al cargar la página (INSEGURO, ver nota arriba)
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        // No hay usuario autenticado, redirigir al login
+        alert("Acceso denegado. Debes iniciar sesión.");
+        window.location.href = "login.html";
+        return;
+      }
+      // Si hay un usuario, comprobamos su rol (esto aún es INSEGURO si el rol no se verifica en el backend)
+      const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
+      if (!loguedUser || loguedUser.role !== 'admin') {
+        alert("Acceso denegado. Se requieren permisos de Administrador.");
+        window.location.href = "index.html";
+      }
+      // En un escenario seguro, el rol del usuario se obtendría de un campo personalizado
+      // en el objeto de usuario de Firebase Authentication (custom claims)
+      // o se verificaría en el backend a través de las reglas de seguridad de Realtime Database.
+    });
+
 
     // Rellenar formulario con los datos guardados en la nube
     document.addEventListener('DOMContentLoaded', () => {
-      db.ref('proximo_partido').once('value').then((snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          if(document.getElementById('input-rival')) document.getElementById('input-rival').value = data.rival || '';
-          if(document.getElementById('input-tournament')) document.getElementById('input-tournament').value = data.torneo || '';
-          if(document.getElementById('input-condition')) document.getElementById('input-condition').value = data.condicion || 'Local';
-          if(document.getElementById('input-date')) document.getElementById('input-date').value = data.fecha || '';
-          if(document.getElementById('input-day')) document.getElementById('input-day').value = data.dia || '';
-          if(document.getElementById('input-time')) document.getElementById('input-time').value = data.hora || '';
-          if(document.getElementById('input-stadium')) document.getElementById('input-stadium').value = data.estadio || '';
-        }
-      }).catch(err => console.error("Error al sincronizar datos:", err));
+      if (db) { // Asegúrate de que db se ha inicializado correctamente
+        db.ref('proximo_partido').once('value').then((snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            if(document.getElementById('input-rival')) document.getElementById('input-rival').value = data.rival || '';
+            if(document.getElementById('input-tournament')) document.getElementById('input-tournament').value = data.torneo || '';
+            if(document.getElementById('input-condition')) document.getElementById('input-condition').value = data.condicion || 'Local';
+            if(document.getElementById('input-date')) document.getElementById('input-date').value = data.fecha || '';
+            if(document.getElementById('input-day')) document.getElementById('input-day').value = data.dia || '';
+            if(document.getElementById('input-time')) document.getElementById('input-time').value = data.hora || '';
+            if(document.getElementById('input-stadium')) document.getElementById('input-stadium').value = data.stadium || '';
+          }
+        }).catch(err => console.error("Error al sincronizar datos:", err));
+      } else {
+        console.error("Firebase Realtime Database no está disponible.");
+      }
     });
 
     function guardarProximoPartido(e) {
       e.preventDefault();
-      db.ref('proximo_partido').set({
-        rival: document.getElementById('input-rival').value.trim(),
-        torneo: document.getElementById('input-tournament').value.trim(),
-        condicion: document.getElementById('input-condition').value,
-        fecha: document.getElementById('input-date').value.trim(),
-        dia: document.getElementById('input-day').value.trim(),
-        hora: document.getElementById('input-time').value,
-        stadium: document.getElementById('input-stadium').value.trim()
-      })
-      .then(() => alert("¡Datos del encuentro publicados en la nube!"))
-      .catch(err => alert("Error al guardar: " + err.message));
+      if (db) { // Asegúrate de que db se ha inicializado correctamente
+        db.ref('proximo_partido').set({
+          rival: document.getElementById('input-rival').value.trim(),
+          torneo: document.getElementById('input-tournament').value.trim(),
+          condicion: document.getElementById('input-condition').value,
+          fecha: document.getElementById('input-date').value.trim(),
+          dia: document.getElementById('input-day').value.trim(),
+          hora: document.getElementById('input-time').value,
+          stadium: document.getElementById('input-stadium').value.trim()
+        })
+        .then(() => alert("¡Datos del encuentro publicados en la nube!"))
+        .catch(err => alert("Error al guardar: " + err.message));
+      } else {
+        alert("Error: Firebase Realtime Database no está disponible para guardar los datos.");
+      }
     }
 
     function limpiarAsistencias() {
       if (confirm("¿Deseas vaciar la lista de asistencias del partido actual?")) {
-        db.ref('asistencias/partido_actual').remove()
-          .then(() => alert("Lista de asistencias reiniciada correctamente."))
-          .catch(err => alert("Error al limpiar: " + err.message));
+        if (db) { // Asegúrate de que db se ha inicializado correctamente
+          db.ref('asistencias/partido_actual').remove()
+            .then(() => alert("Lista de asistencias reiniciada correctamente."))
+            .catch(err => alert("Error al limpiar: " + err.message));
+        } else {
+          alert("Error: Firebase Realtime Database no está disponible para limpiar las asistencias.");
+        }
       }
     }
 
     function cerrarSesion() {
       if (confirm('¿Deseas cerrar tu sesión?')) {
-        localStorage.removeItem('softball_logged_user');
-        window.location.href = "login.html";
+        if (auth) { // Asegúrate de que auth se ha inicializado correctamente
+          auth.signOut().then(() => {
+            localStorage.removeItem('softball_logged_user'); // Limpia también el localStorage
+            window.location.href = "login.html";
+          }).catch((error) => {
+            console.error("Error al cerrar sesión de Firebase:", error);
+            alert("Error al cerrar sesión: " + error.message);
+          });
+        } else {
+          localStorage.removeItem('softball_logged_user'); // Si Firebase Auth no está listo, solo limpia localStorage
+          window.location.href = "login.html";
+        }
       }
     }
   </script>

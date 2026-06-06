@@ -16,9 +16,12 @@
   <!-- ================================================================= -->
   <!-- CARGA PRIORITARIA DE LIBRERÍAS DE FIREBASE (Evita el ReferenceError) -->
   <!-- ================================================================= -->
-  <!-- ❌ ESTO DA ERROR 404 Y ROMPE TU APP -->
-<script src="https://gstatic.com"></script>
-<script src="https://gstatic.com"></script>
+  <!-- Core Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <!-- Firebase Authentication SDK (recommended for secure logins) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <!-- Firebase Realtime Database SDK (used for your current login logic) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 </head>
 <body>
@@ -52,19 +55,19 @@
   <!-- ================================================================= -->
   <script>
     // Variables globales
-    let db;
+    let db; // Variable para la instancia de Realtime Database
+    let auth; // Variable para la instancia de Firebase Authentication
 
     // Configuración oficial de tu proyecto
     const firebaseConfig = {
       apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
-      authDomain: "://firebaseapp.com",
-      databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app/", // ACTUALIZADO
+      authDomain: "piratas-tenerife.firebaseapp.com", // CORREGIDO
+      databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app/",
       projectId: "piratas-tenerife",
       storageBucket: "piratas-tenerife.firebasestorage.app",
       messagingSenderId: "328725969132",
       appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
     };
-
 
     // Inicialización cuando las librerías del head estén 100% listas
     try {
@@ -72,6 +75,7 @@
         firebase.initializeApp(firebaseConfig);
       }
       db = firebase.database();
+      auth = firebase.auth(); // Inicializamos Firebase Authentication
     } catch (e) {
       console.error("Fallo crítico al inicializar Firebase. Revisa la caché del navegador.", e);
     }
@@ -92,6 +96,10 @@
       const txtName = document.getElementById('login-name').value.trim();
       const txtPassword = document.getElementById('login-password').value;
 
+      // ATENCIÓN: Esta implementación es INSEGURA para un sistema de login real.
+      // Las contraseñas no deben guardarse en texto plano en la base de datos
+      // y la lógica de autenticación no debe realizarse del lado del cliente de esta manera.
+      // Se recomienda encarecidamente utilizar Firebase Authentication.
       db.ref('usuarios').once('value').then((snapshot) => {
         let listaUsuarios = [];
         
@@ -142,10 +150,12 @@
       if (db) {
         db.ref('usuarios').once('value').then((snapshot) => {
           if (!snapshot.exists()) {
+            // Solo creamos usuarios si no existen, para evitar sobrescribirlos en cada carga.
             db.ref('usuarios/usr_1').set({ name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' });
             db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' });
+            console.log("Usuarios iniciales creados.");
           }
-        }).catch(err => console.error("Error al verificar usuarios iniciales:", err));
+        }).catch(err => console.error("Error al verificar o crear usuarios iniciales:", err));
       }
     });
   </script>
