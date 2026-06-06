@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Piratas de Tenerife - Iniciar Sesión</title>
+  
+  <!-- ================================================================= -->
+  <!-- CARGA PRIORITARIA DE LIBRERÍAS (Soluciona el ReferenceError)     -->
+  <!-- ================================================================= -->
+  <script src="https://gstatic.com"></script>
+  <script src="https://gstatic.com"></script>
+
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#2E7D32">
   <style>
@@ -40,20 +47,14 @@
   </div>
 
   <!-- ================================================================= -->
-  <!-- PASO 1: CARGAR PRIMERO LAS LIBRERÍAS (OBLIGATORIO)              -->
-  <!-- ================================================================= -->
-  <script src="https://gstatic.com"></script>
-  <script src="https://gstatic.com"></script>
-
-  <!-- ================================================================= -->
-  <!-- PASO 2: INICIALIZAR Y OPERAR (DESPUÉS DE QUE EXISTE FIREBASE)    -->
+  <!-- LÓGICA DE LA APLICACIÓN                                           -->
   <!-- ================================================================= -->
   <script>
     // Configuración limpia
     const firebaseConfig = {
       apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
       authDomain: "://firebaseapp.com",
-      databaseURL: "https://firebasedatabase.app", // NOTA: Cambia esto por tu URL de Firebase Realtime si es diferente
+      databaseURL: "https://firebasedatabase.app", 
       projectId: "piratas-tenerife",
       storageBucket: "piratas-tenerife.firebasestorage.app",
       messagingSenderId: "328725969132",
@@ -121,7 +122,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Verificar e inyectar cuentas por defecto si la base de datos está vacía
       db.ref('usuarios').once('value').then((snapshot) => {
         if (!snapshot.exists()) {
           db.ref('usuarios/usr_1').set({ name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' });
