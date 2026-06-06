@@ -147,15 +147,19 @@
   </div>
 
   <!-- ================================================================= -->
-  <!-- LIBRERÍAS DE FIREBASE CORREGIDAS (Se cargan ANTES que app.js)      -->
+  <!-- 1. LIBRERÍAS DE FIREBASE OBLIGATORIAS (Carga prioritaria)         -->
   <!-- ================================================================= -->
   <script src="https://gstatic.com"></script>
   <script src="https://gstatic.com"></script>
   
-  <!-- SCRIPT DE LÓGICA GENERAL -->
+  <!-- ================================================================= -->
+  <!-- 2. SCRIPT DE LÓGICA GENERAL (Se ejecuta tras Firebase)           -->
+  <!-- ================================================================= -->
   <script src="app.js"></script>
 
-  <!-- REGISTRO DEL SERVICE WORKER (Activador de la PWA) -->
+  <!-- ================================================================= -->
+  <!-- 3. INTERCEPTOR DEL SERVICE WORKER (Activador de la PWA)          -->
+  <!-- ================================================================= -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
