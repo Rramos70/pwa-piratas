@@ -5,32 +5,29 @@ const firebaseConfig = {
  apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
  authDomain: "piratas-tenerife.firebaseapp.com",
  databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "piratas-tenerife",
-  storageBucket: "piratas-tenerife.firebasestorage.app",
-  messagingSenderId: "328725969132",
-  appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
+ projectId: "piratas-tenerife",
+ storageBucket: "piratas-tenerife.firebasestorage.app",
+ messagingSenderId: "328725969132",
+ appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
 };
-
 
 // Inicializar la App en la Web
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ==========================================
-// 2. FUNCIÓN DE DETECCIÓN DE RUTA ABSOLUTA AUTOMÁTICA
+// 2. FUNCIÓN DE DETECCIÓN DE RUTA FIABLE EN GITHUB PAGES
 // ==========================================
 function redirigirA(pagina) {
   const loc = window.location;
-  // Extrae la ruta base del repositorio (ej: /piratas/) o devuelve / si es local
-  const pathArray = loc.pathname.split('/');
-  const isGitHubPages = loc.hostname.includes('github.io');
+  // Obtiene el nombre del archivo actual del path (ej: index.html)
+  const currentFile = loc.pathname.substring(loc.pathname.lastIndexOf('/') + 1);
   
-  if (isGitHubPages && pathArray.length > 2) {
-    const repoName = pathArray[1];
-    loc.href = `${loc.origin}/${repoName}/${pagina}`;
-  } else {
-    loc.href = `${loc.origin}/${pagina}`;
-  }
+  if (currentFile === pagina) return; // Previene bucles infinitos de redirección
+
+  // Reemplaza el archivo actual por la página destino manteniendo la estructura exacta de subcarpetas
+  const newPath = loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1) + pagina;
+  loc.href = loc.origin + newPath;
 }
 
 // ==========================================
