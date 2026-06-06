@@ -3,214 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Piratas de Tenerife - Administración</title>
+  <title>Piratas de Tenerife - Panel de Control</title>
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#2E7D32">
   <style>
-    .admin-container { padding: 15px; display: flex; flex-direction: column; gap: 20px; }
-    .admin-section { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .admin-title { font-size: 1.2rem; margin-top: 0; margin-bottom: 15px; color: #2E7D32; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; }
-    .form-row { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
-    .form-row label { font-size: 13px; font-weight: bold; color: #555; }
-    .btn-admin { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; }
-    .btn-save { background-color: #2E7D32; }
-    .btn-add { background-color: #0288d1; }
+    .admin-container { max-width: 600px; margin: 20px auto; padding: 15px; }
+    .form-section { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px; }
+    .btn-admin { width: 100%; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 5px; }
+    .btn-primary { background-color: #2E7D32; color: white; }
+    .btn-danger { background-color: #c62828; color: white; }
   </style>
 </head>
 <body>
-
   <div class="mobile-app-wrapper">
     <header class="main-header">
-      <div class="header-container" style="display: flex; align-items: center; gap: 12px;">
-        <img src="logop.png" alt="Logotipo" style="width: 35px; height: 35px; object-fit: contain;">
-        <div>
-          <h1 style="margin: 0; font-size: 1.2rem;">Panel de Control</h1>
-          <p class="subtitle" style="margin: 0;">Gestión del Equipo</p>
-        </div>
+      <div class="header-container">
+        <h1>⚙️ Panel de Administración</h1>
+        <p class="subtitle">Gestión de Encuentros y Eventos</p>
       </div>
     </header>
 
     <main class="app-container admin-container">
-
-      <!-- CONFIGURAR PRÓXIMO PARTIDO -->
-      <section class="admin-section">
-        <h2 class="admin-title">🗓️ Configurar Próximo Partido</h2>
-        <form id="form-next-match" onsubmit="actualizarProximoPartido(event)">
-          <div class="form-row">
-            <label for="next-rival-in">Rival:</label>
-            <input type="text" id="next-rival-in" class="modern-input" required placeholder="Ej. Lobos del Sur">
+      <!-- ACTUALIZAR PRÓXIMO PARTIDO -->
+      <section class="card form-section">
+        <h2>🥎 Actualizar Próximo Partido</h2>
+        <form id="form-next-match" onsubmit="guardarProximoPartido(event)">
+          <div class="form-group">
+            <label for="input-rival">Rival</label>
+            <input type="text" id="input-rival" class="modern-input" required placeholder="Ej. Marineros de Tenerife">
           </div>
-          <div class="form-row">
-            <label for="next-date-in">Fecha:</label>
-            <input type="date" id="next-date-in" class="modern-input" required>
+          <div class="form-group">
+            <label for="input-tournament">Torneo / Liga</label>
+            <input type="text" id="input-tournament" class="modern-input" placeholder="Ej. Liga de Verano 2026">
           </div>
-          <div class="form-row">
-            <label for="next-time-in">Hora:</label>
-            <input type="time" id="next-time-in" class="modern-input" required>
+          <div class="form-group">
+            <label for="input-condition">Condición</label>
+            <select id="input-condition" class="modern-input">
+              <option value="Local">Local</option>
+              <option value="Visitante">Visitante</option>
+            </select>
           </div>
-          <div class="form-row">
-            <label for="next-stadium-in">Estadio / Campo:</label>
-            <input type="text" id="next-stadium-in" class="modern-input" required placeholder="Ej. Polideportivo El Médano">
+          <div class="form-group">
+            <label for="input-date">Fecha</label>
+            <input type="text" id="input-date" class="modern-input" required placeholder="Ej. 14 de Junio">
           </div>
-          <button type="submit" class="btn-admin btn-save">💾 Actualizar Cartelera</button>
+          <div class="form-group">
+            <label for="input-day">Día de la semana</label>
+            <input type="text" id="input-day" class="modern-input" placeholder="Ej. Domingo">
+          </div>
+          <div class="form-group">
+            <label for="input-time">Hora</label>
+            <input type="time" id="input-time" class="modern-input" required>
+          </div>
+          <div class="form-group">
+            <label for="input-stadium">Estadio</label>
+            <input type="text" id="input-stadium" class="modern-input" required placeholder="Ej. Campo de Softbol El Burgado">
+          </div>
+          <button type="submit" class="btn-admin btn-primary">💾 Publicar Partido</button>
         </form>
       </section>
 
-      <!-- AGREGAR A LA AGENDA FUTURA -->
-      <section class="admin-section">
-        <h2 class="admin-title">⏳ Añadir a la Agenda</h2>
-        <form id="form-agenda" onsubmit="agregarAgenda(event)">
-          <div class="form-row">
-            <label for="agenda-rival">Rival:</label>
-            <input type="text" id="agenda-rival" class="modern-input" required placeholder="Ej. Halcones BBC">
-          </div>
-          <div class="form-row">
-            <label for="agenda-fecha">Fecha y Hora:</label>
-            <input type="text" id="agenda-fecha" class="modern-input" required placeholder="Ej. Sábado 24 de Oct. - 16:00">
-          </div>
-          <button type="submit" class="btn-admin btn-add">➕ Programar Encuentro</button>
-        </form>
+      <!-- RESETEAR ASISTENCIAS -->
+      <section class="card form-section">
+        <h2>⚠️ Control de Asistencias</h2>
+        <p style="font-size:13px; color:#555; margin-bottom:10px;">Limpia la lista de confirmados y bajas para el nuevo partido programado.</p>
+        <button type="button" class="btn-admin btn-danger" onclick="limpiarAsistencias()">🗑️ Reiniciar Lista de Asistencias</button>
       </section>
-
-      <!-- AGREGAR HISTORIAL DE RESULTADOS -->
-      <section class="admin-section">
-        <h2 class="admin-title">📋 Registrar Resultado Pasado</h2>
-        <form id="form-history" onsubmit="agregarHistorial(event)">
-          <div class="form-row">
-            <label for="hist-rival">Rival:</label>
-            <input type="text" id="hist-rival" class="modern-input" required placeholder="Ej. Titanes">
-          </div>
-          <div class="form-row">
-            <label for="hist-result">Resultado (Nosotros - Ellos):</label>
-            <input type="text" id="hist-result" class="modern-input" required placeholder="Ej. 12 - 8 (Ganado)">
-          </div>
-          <div class="form-row">
-            <label for="hist-date">Fecha:</label>
-            <input type="text" id="hist-date" class="modern-input" required placeholder="Ej. 12 Mayo">
-          </div>
-          <button type="submit" class="btn-admin btn-add">➕ Añadir al Historial</button>
-        </form>
-      </section>
-
-      <!-- AGREGAR CUMPLEAÑERO -->
-      <section class="admin-section">
-        <h2 class="admin-title">🎂 Cumpleañeros del Mes</h2>
-        <form id="form-birthday" onsubmit="agregarCumpleanios(event)">
-          <div class="form-row">
-            <label for="bday-name">Nombre del Jugador:</label>
-            <input type="text" id="bday-name" class="modern-input" required placeholder="Ej. Carlos Mendoza">
-          </div>
-          <div class="form-row">
-            <label for="bday-date">Día del Cumpleaños:</label>
-            <input type="text" id="bday-date" class="modern-input" required placeholder="Ej. 14 de Junio">
-          </div>
-          <button type="submit" class="btn-admin btn-add">➕ Registrar Cumpleaños</button>
-        </form>
-      </section>
-
     </main>
 
     <!-- MENÚ DE NAVEGACIÓN -->
     <nav class="bottom-nav">
-      <a href="index.html" class="nav-item">
-        <span class="nav-icon" aria-hidden="true">🏠</span>
-        <span class="nav-label">Inicio</span>
-      </a>
-      <a href="admin.html" class="nav-item active" id="nav-link-admin">
-        <span class="nav-icon" aria-hidden="true">🗓️</span>
-        <span class="nav-label">Partidos</span>
-      </a>
-      <a href="usuarios.html" class="nav-item" id="nav-link-users">
-        <span class="nav-icon" aria-hidden="true">👥</span>
-        <span class="nav-label">Usuarios</span>
-      </a>
-      <a href="#" class="nav-item" onclick="if(confirm('¿Cerrar sesión?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; } return false;">
-        <span class="nav-icon" style="color:#c62828;" aria-hidden="true">🚪</span>
-        <span class="nav-label" style="color:#c62828;">Salir</span>
-      </a>
+      <a href="index.html" class="nav-item">🏠<span class="nav-label">Inicio</span></a>
+      <a href="admin.html" class="nav-item active" id="nav-link-admin">🗓️<span class="nav-label">Partidos</span></a>
+      <a href="usuarios.html" class="nav-item" id="nav-link-users">👥<span class="nav-label">Usuarios</span></a>
+      <a href="javascript:void(0);" class="nav-item" onclick="cerrarSesion()">🚪<span class="nav-label">Salir</span></a>
     </nav>
   </div>
 
+  <!-- LIBRERÍAS DE FIREBASE -->
   <script src="https://gstatic.com"></script>
   <script src="https://gstatic.com"></script>
-  
+
   <script>
-    // REEMPLAZA CON TU CONFIGURACIÓN DE FIREBASE
-    const firebaseConfig = {
-      apiKey: "TU_API_KEY_AQUÍ",
-      authDomain: "TU_AUTH_DOMAIN_AQUÍ",
-      databaseURL: "TU_DATABASE_URL_AQUÍ",
-      projectId: "TU_PROJECT_ID_AQUÍ",
-      storageBucket: "TU_STORAGE_BUCKET_AQUÍ",
-      messagingSenderId: "TU_MESSAGING_SENDER_ID_AQUÍ",
-      appId: "TU_APP_ID_AQUÍ"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // FILTRO DE SEGURIDAD ESTRICTO
+    // 1. CONTROL DE ACCESO INMEDIATO ANTES DE INICIALIZAR
     const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
     if (!loguedUser || loguedUser.role !== 'admin') {
-      window.location.href = 'index.html';
+      alert("Acceso denegado. Se requieren permisos de Administrador.");
+      window.location.href = "index.html";
     }
 
-    // 1. GUARDAR DATOS DEL PRÓXIMO ENCUENTRO PRINCIPAL
-    function actualizarProximoPartido(e) {
+    // 2. CONFIGURACIÓN E INICIALIZACIÓN
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
+      authDomain: "://firebaseapp.com",
+      databaseURL: "https://firebasedatabase.app",
+      projectId: "piratas-tenerife",
+      storageBucket: "piratas-tenerife.firebasestorage.app",
+      messagingSenderId: "328725969132",
+      appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 3. CARGAR DATOS ACTUALES EN EL FORMULARIO
+    document.addEventListener('DOMContentLoaded', () => {
+      db.ref('proximo_partido').once('value').then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if(document.getElementById('input-rival')) document.getElementById('input-rival').value = data.rival || '';
+          if(document.getElementById('input-tournament')) document.getElementById('input-tournament').value = data.torneo || '';
+          if(document.getElementById('input-condition')) document.getElementById('input-condition').value = data.condicion || 'Local';
+          if(document.getElementById('input-date')) document.getElementById('input-date').value = data.fecha || '';
+          if(document.getElementById('input-day')) document.getElementById('input-day').value = data.dia || '';
+          if(document.getElementById('input-time')) document.getElementById('input-time').value = data.hora || '';
+          if(document.getElementById('input-stadium')) document.getElementById('input-stadium').value = data.estadio || '';
+        }
+      });
+    });
+
+    // 4. GUARDAR CAMBIOS
+    function guardarProximoPartido(e) {
       e.preventDefault();
       db.ref('proximo_partido').set({
-        rival: document.getElementById('next-rival-in').value,
-        fecha: document.getElementById('next-date-in').value,
-        hora: document.getElementById('next-time-in').value,
-        estadio: document.getElementById('next-stadium-in').value
-      }).then(() => {
-        alert("¡Cartelera principal actualizada!");
-        // Opcional: Borrar lista de asistencias previa al cambiar de partido
-        if(confirm("¿Deseas reiniciar la lista de asistencia (Sí/No) para el nuevo partido?")) {
-           db.ref('asistencias/partido_actual').remove();
-        }
-        document.getElementById('form-next-match').reset();
-      });
+        rival: document.getElementById('input-rival').value.trim(),
+        torneo: document.getElementById('input-tournament').value.trim(),
+        condicion: document.getElementById('input-condition').value,
+        fecha: document.getElementById('input-date').value.trim(),
+        dia: document.getElementById('input-day').value.trim(),
+        hora: document.getElementById('input-time').value,
+        estadio: document.getElementById('input-stadium').value.trim()
+      })
+      .then(() => alert("¡Datos del partido publicados con éxito!"))
+      .catch(err => alert("Error al guardar: " + err.message));
     }
 
-    // 2. AGREGAR PRÓXIMO ENCUENTRO SECUNDARIO A LA AGENDA
-    function agregarAgenda(e) {
-      e.preventDefault();
-      const nuevoPartidoRef = db.ref('agenda_partidos').push();
-      nuevoPartidoRef.set({
-        rival: document.getElementById('agenda-rival').value,
-        fecha: document.getElementById('agenda-fecha').value
-      }).then(() => {
-        alert("Partido agendado con éxito");
-        document.getElementById('form-agenda').reset();
-      });
+    // 5. REINICIAR ASISTENCIAS
+    function limpiarAsistencias() {
+      if (confirm("¿Estás seguro de que quieres borrar TODAS las asistencias actuales? Esta acción no se puede deshacer.")) {
+        db.ref('asistencias/partido_actual').remove()
+          .then(() => alert("Lista de asistencias vaciada correctamente."))
+          .catch(err => alert("Error al limpiar: " + err.message));
+      }
     }
 
-    // 3. REGISTRAR PARTIDO EN EL HISTORIAL
-    function agregarHistorial(e) {
-      e.preventDefault();
-      const historialRef = db.ref('historial_partidos').push();
-      historialRef.set({
-        rival: document.getElementById('hist-rival').value,
-        resultado: document.getElementById('hist-result').value,
-        fecha: document.getElementById('hist-date').value
-      }).then(() => {
-        alert("Resultado añadido al historial");
-        document.getElementById('form-history').reset();
-      });
-    }
-
-    // 4. CREAR CUMPLEAÑERO
-    function agregarCumpleanios(e) {
-      e.preventDefault();
-      const bdayRef = db.ref('cumpleanios').push();
-      bdayRef.set({
-        name: document.getElementById('bday-name').value,
-        date: document.getElementById('bday-date').value
-      }).then(() => {
-        alert("Cumpleañero guardado");
-        document.getElementById('form-birthday').reset();
-      });
+    function cerrarSesion() {
+      if (confirm('¿Deseas cerrar tu sesión?')) {
+        localStorage.removeItem('softball_logged_user');
+        window.location.href = "login.html";
+      }
     }
   </script>
 </body>

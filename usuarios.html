@@ -3,162 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Piratas de Tenerife - Jugadores</title>
+  <title>Piratas de Tenerife - Gestión de Usuarios</title>
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#2E7D32">
   <style>
-    .user-container { padding: 15px; display: flex; flex-direction: column; gap: 20px; }
-    .user-list-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-    .user-info { display: flex; flex-direction: column; gap: 20px; }
-    .status-badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: white; cursor: pointer; }
-    .status-activo { background-color: #2E7D32; }
-    .status-inactivo { background-color: #c62828; }
+    .users-list-wrapper { padding: 10px; }
+    .user-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: white; margin-bottom: 6px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .user-info { display: flex; flex-direction: column; gap: 2px; }
+    .badge-role { display: inline-block; padding: 2px 6px; font-size: 11px; border-radius: 4px; font-weight: bold; width: fit-content; text-transform: uppercase; }
+    .role-admin { background-color: #e57373; color: #b71c1c; }
+    .role-player { background-color: #c8e6c9; color: #1b5e20; }
+    .btn-status { padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .status-activo { background-color: #ffe0b2; color: #e65100; } /* Al pulsar cambiará */
+    .status-inactivo { background-color: #cfd8dc; color: #37474f; }
   </style>
 </head>
 <body>
-
   <div class="mobile-app-wrapper">
     <header class="main-header">
-      <div class="header-container" style="display: flex; align-items: center; gap: 12px;">
-        <img src="logop.png" alt="Logotipo" style="width: 35px; height: 35px; object-fit: contain;">
-        <div>
-          <h1 style="margin: 0; font-size: 1.2rem;">Plantilla del Club</h1>
-          <p class="subtitle" style="margin: 0;">Gestión de Jugadores</p>
-        </div>
+      <div class="header-container">
+        <h1>👥 Gestión de Plantilla</h1>
+        <p class="subtitle">Control de Acceso de Jugadores</p>
       </div>
     </header>
 
-    <main class="app-container user-container">
-      
-      <!-- AGREGAR NUEVO JUGADOR -->
-      <section class="user-list-box">
-        <h3 style="margin-top: 0; color: #2E7D32;">➕ Registrar Nuevo Jugador</h3>
-        <form id="form-add-user" onsubmit="crearUsuario(event)">
-          <div style="margin-bottom:10px;">
-            <input type="text" id="new-user-name" class="modern-input" placeholder="Nombre y Apellido" required>
-          </div>
-          <div style="margin-bottom:10px;">
-            <input type="text" id="new-user-pass" class="modern-input" placeholder="Contraseña de Acceso" required>
-          </div>
-          <div style="margin-bottom:10px;">
-            <select id="new-user-role" class="modern-input" style="background: white;">
-              <option value="player">Jugador Estándar</option>
-              <option value="admin">Administrador del Club</option>
-            </select>
-          </div>
-          <button type="submit" class="modern-input" style="background: #2E7D32; color:white; font-weight:bold; border:none; cursor:pointer;">Registrar en la Nube</button>
-        </form>
+    <main class="app-container users-list-wrapper">
+      <section class="card">
+        <h2 style="margin-bottom:12px;">Jugadores Registrados</h2>
+        <div id="loading-msg" style="text-align:center; padding:10px; font-style:italic; color:#777;">Cargando jugadores...</div>
+        <div id="container-usuarios-lista"></div>
       </section>
-
-      <!-- ROSTER EN TIEMPO REAL -->
-      <section class="user-list-box">
-        <h3 style="margin-top: 0; color: #555;">👥 Lista de Jugadores Registrados</h3>
-        <div id="roster-list-wrapper">
-          <!-- Inyección dinámica desde Firebase -->
-        </div>
-      </section>
-
     </main>
 
     <!-- MENÚ DE NAVEGACIÓN -->
     <nav class="bottom-nav">
-      <a href="index.html" class="nav-item">
-        <span class="nav-icon" aria-hidden="true">🏠</span>
-        <span class="nav-label">Inicio</span>
-      </a>
-      <a href="admin.html" class="nav-item" id="nav-link-admin">
-        <span class="nav-icon" aria-hidden="true">🗓️</span>
-        <span class="nav-label">Partidos</span>
-      </a>
-      <a href="usuarios.html" class="nav-item active" id="nav-link-users">
-        <span class="nav-icon" aria-hidden="true">👥</span>
-        <span class="nav-label">Usuarios</span>
-      </a>
-      <a href="#" class="nav-item" onclick="if(confirm('¿Cerrar sesión?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; } return false;">
-        <span class="nav-icon" style="color:#c62828;" aria-hidden="true">🚪</span>
-        <span class="nav-label" style="color:#c62828;">Salir</span>
-      </a>
+      <a href="index.html" class="nav-item">🏠<span class="nav-label">Inicio</span></a>
+      <a href="admin.html" class="nav-item" id="nav-link-admin">🗓️<span class="nav-label">Partidos</span></a>
+      <a href="usuarios.html" class="nav-item active" id="nav-link-users">👥<span class="nav-label">Usuarios</span></a>
+      <a href="javascript:void(0);" class="nav-item" onclick="cerrarSesion()">🚪<span class="nav-label">Salir</span></a>
     </nav>
   </div>
 
+  <!-- LIBRERÍAS DE FIREBASE -->
   <script src="https://gstatic.com"></script>
   <script src="https://gstatic.com"></script>
-  
+
   <script>
-    // REEMPLAZA CON TU CONFIGURACIÓN DE FIREBASE
-    const firebaseConfig = {
-      apiKey: "TU_API_KEY_AQUÍ",
-      authDomain: "TU_AUTH_DOMAIN_AQUÍ",
-      databaseURL: "TU_DATABASE_URL_AQUÍ",
-      projectId: "TU_PROJECT_ID_AQUÍ",
-      storageBucket: "TU_STORAGE_BUCKET_AQUÍ",
-      messagingSenderId: "TU_MESSAGING_SENDER_ID_AQUÍ",
-      appId: "TU_APP_ID_AQUÍ"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // FILTRO DE SEGURIDAD ESTRICTO
+    // 1. CONTROL DE ACCESO INMEDIATO ANTES DE INICIALIZAR
     const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
     if (!loguedUser || loguedUser.role !== 'admin') {
-      window.location.href = 'index.html';
+      alert("Acceso denegado. Se requieren permisos de Administrador.");
+      window.location.href = "index.html";
     }
 
-    // CREAR UN JUGADOR NUEVO EN FIREBASE
-    function crearUsuario(e) {
-      e.preventDefault();
-      const uName = document.getElementById('new-user-name').value.trim();
-      const uPass = document.getElementById('new-user-pass').value;
-      const uRole = document.getElementById('new-user-role').value;
+    // 2. CONFIGURACIÓN E INICIALIZACIÓN
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
+      authDomain: "://firebaseapp.com",
+      databaseURL: "https://firebasedatabase.app",
+      projectId: "piratas-tenerife",
+      storageBucket: "piratas-tenerife.firebasestorage.app",
+      messagingSenderId: "328725969132",
+      appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
+    };
 
-      // Generar una clave única aleatoria basada en push()
-      const nuevoUserRef = db.ref('usuarios').push();
-      nuevoUserRef.set({
-        name: uName,
-        password: uPass,
-        role: uRole,
-        status: 'activo'
-      }).then(() => {
-        alert(`¡${uName} registrado correctamente!`);
-        document.getElementById('form-add-user').reset();
-      });
-    }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // CAMBIAR EL ESTADO (ACTIVO/INACTIVO) AL HACER CLICK EN EL BADGE
-    function toggleStatus(userId, currentStatus) {
-      const nextStatus = currentStatus === 'activo' ? 'inactivo' : 'activo';
-      db.ref(`usuarios/${userId}/status`).set(nextStatus);
-    }
-
-    // ESCUCHAR EN TIEMPO REAL LA LISTA DE USUARIOS
+    // 3. ESCUCHA DE USUARIOS EN TIEMPO REAL
     db.ref('usuarios').on('value', (snapshot) => {
-      const container = document.getElementById('roster-list-wrapper');
-      container.innerHTML = "";
+      const loader = document.getElementById('loading-msg');
+      if (loader) loader.style.display = 'none';
 
-      if(snapshot.exists()) {
-        snapshot.forEach((child) => {
-          const uId = child.key;
-          const user = child.val();
+      const listaContenedor = document.getElementById('container-usuarios-lista');
+      if (!listaContenedor) return;
+      listaContenedor.innerHTML = "";
 
-          const itemDiv = document.createElement('div');
-          itemDiv.className = "user-item";
-          itemDiv.innerHTML = `
-            <div>
-              <strong style="display:block;">${user.name}</strong>
-              <small style="color:#777;">Rol: ${user.role} | Clave: ${user.password}</small>
+      if (snapshot.exists()) {
+        snapshot.forEach((childSnapshot) => {
+          const userId = childSnapshot.key;
+          const usuario = childSnapshot.val();
+
+          const row = document.createElement('div');
+          row.className = 'user-row';
+
+          const roleClass = usuario.role === 'admin' ? 'role-admin' : 'role-player';
+          const isActivo = usuario.status !== 'inactivo';
+          const btnText = isActivo ? '🚫 Desactivar' : '✅ Activar';
+          const btnClass = isActivo ? 'status-activo' : 'status-inactivo';
+
+          row.innerHTML = `
+            <div class="user-info">
+              <strong>${usuario.name || 'Sin Nombre'}</strong>
+              <span class="badge-role ${roleClass}">${usuario.role || 'player'}</span>
             </div>
-            <span class="status-badge status-${user.status}" onclick="toggleStatus('${uId}', '${user.status}')">
-              ${user.status}
-            </span>
+            <div>
+              <button class="btn-status ${btnClass}" onclick="toggleStatus('${userId}', '${usuario.status || 'activo'}')">
+                ${btnText}
+              </button>
+            </div>
           `;
-          container.appendChild(itemDiv);
+          listaContenedor.appendChild(row);
         });
       } else {
-        container.innerHTML = "<p style='color:#777;'>No hay usuarios en la base de datos.</p>";
+        listaContenedor.innerHTML = '<p style="text-align:center; color:#777;">No hay usuarios registrados.</p>';
       }
     });
+
+    // 4. CAMBIAR ESTADO DE ACTIVO/INACTIVO
+    function toggleStatus(id, currentStatus) {
+      const newStatus = currentStatus === 'inactivo' ? 'activo' : 'inactivo';
+      db.ref(`usuarios/${id}/status`).set(newStatus)
+        .catch(err => alert("Error al modificar estado: " + err.message));
+    }
+
+    function cerrarSesion() {
+      if (confirm('¿Deseas cerrar tu sesión?')) {
+        localStorage.removeItem('softball_logged_user');
+        window.location.href = "login.html";
+      }
+    }
   </script>
 </body>
 </html>

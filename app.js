@@ -3,15 +3,15 @@
 // ==========================================
 const firebaseConfig = {
  apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
- authDomain: "piratas-tenerife.firebaseapp.com", // CORREGIDO: Añadido el ID del proyecto
- databaseURL: "https://firebasedatabase.app",
+ authDomain: "://firebaseapp.com", // CORREGIDO: ID del proyecto integrado
+ databaseURL: "https://firebasedatabase.app",     // NOTA: Asegúrate de que coincida con tu consola
  projectId: "piratas-tenerife",
  storageBucket: "piratas-tenerife.firebasestorage.app",
  messagingSenderId: "328725969132",
  appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
 };
 
-// Inicializar Firebase de forma segura
+// Inicializar la App de forma segura sin duplicar instancias
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -23,18 +23,18 @@ const db = firebase.database();
 const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
 const currentFilename = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
 
-// Validar y redirigir según sesión
+// Validar y redirigir si no hay sesión activa (excepto en login)
 if (!loguedUser && currentFilename !== "login.html" && currentFilename !== "") {
   window.location.href = "login.html";
 } else if (loguedUser) {
-  // Inyectar de forma segura datos del jugador logueado
-  const sessionUsernameElem = document.getElementById('session-username');
-  const playerNameElem = document.getElementById('player-name');
+  // Inyectar de forma segura datos del jugador logueado si los elementos existen
+  const sessionUsername = document.getElementById('session-username');
+  const playerName = document.getElementById('player-name');
   
-  if (sessionUsernameElem) sessionUsernameElem.textContent = loguedUser.name;
-  if (playerNameElem) playerNameElem.value = loguedUser.name;
+  if (sessionUsername) sessionUsername.textContent = loguedUser.name;
+  if (playerName) playerName.value = loguedUser.name;
   
-  // Control de visibilidad del menú de administración según el rol
+  // Control de visibilidad del menú de administración según el rol asignado
   if (loguedUser.role !== 'admin') {
     const navAdmin = document.getElementById('nav-link-admin');
     const navUsers = document.getElementById('nav-link-users');
@@ -51,7 +51,7 @@ function cerrarSesion() {
   }
 }
 
-// ID fijo del partido actual
+// ID fijo del partido actual para agrupar las asistencias en la base de datos
 const PROXIMO_PARTIDO_ID = "partido_actual";
 
 // ==========================================
@@ -59,7 +59,7 @@ const PROXIMO_PARTIDO_ID = "partido_actual";
 // ==========================================
 function confirmAttendance(statusAsistencia) {
   if (!loguedUser) {
-    alert("Debes iniciar sesión para registrar tu asistencia.");
+    alert("Sesión no válida. Por favor, inicia sesión de nuevo.");
     return;
   }
 
@@ -118,26 +118,47 @@ if (listYes && listNo) {
 // 5. CARGA DE LISTAS DINÁMICAS (TIEMPO REAL)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Evitar ejecuciones si estamos en la pantalla de login
   if (currentFilename === "login.html") return;
   
   if (db) {
-    // Datos del próximo partido
+    // 5.1 Datos del Próximo Partido e Inyección de nuevos campos del HTML
     db.ref('proximo_partido').on('value', (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
+        
         const rival = document.getElementById('next-rival');
         const fecha = document.getElementById('next-date');
         const hora = document.getElementById('next-time');
         const estadio = document.getElementById('next-stadium');
+        
+        // Elementos nuevos soportados
+        const diaSemana = document.getElementById('next-day');
+        const torneo = document.getElementById('next-tournament');
+        const condicion = document.getElementById('next-condition');
 
-        if (rival) rival.textContent = data.rival || '';
-        if (fecha) fecha.textContent = data.fecha || '';
-        if (hora) hora.textContent = data.hora || '';
-        if (estadio) estadio.textContent = data.estadio || '';
+        if (rival) rival.textContent = data.rival || '-';
+        if (fecha) fecha.textContent = data.fecha || '-';
+        if (hora) hora.textContent = data.hora || '-';
+        if (estadio) estadio.textContent = data.estadio || '-';
+        
+        if (diaSemana) diaSemana.textContent = data.dia || '';
+        if (torneo) torneo.textContent = data.torneo || 'Campeonato';
+        
+        if (condicion) {
+          condicion.textContent = data.condicion || 'LOCAL';
+          if (data.condicion && data.condicion.toLowerCase() === 'visitante') {
+            condicion.style.backgroundColor = '#d32f2f'; // Rojo para visitante
+            condicion.style.color = 'white';
+          } else {
+            condicion.style.backgroundColor = '#2E7D32'; // Verde para local
+            condicion.style.color = 'white';
+          }
+        }
       }
     });
 
-    // Cumpleaños
+    // 5.2 Lista de Cumpleaños
     db.ref('cumpleanios').on('value', (snapshot) => {
       const bdayList = document.getElementById('birthday-list');
       if (!bdayList) return;
@@ -155,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Historial de partidos
+    // 5.3 Historial de Partidos Jugados
     db.ref('historial_partidos').on('value', (snapshot) => {
       const historyList = document.getElementById('history-matches-list');
       if (!historyList) return;
@@ -173,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Agenda de partidos futuros
+    // 5.4 Calendario / Agenda de Encuentros Futuros
     db.ref('agenda_partidos').on('value', (snapshot) => {
       const upcomingList = document.getElementById('upcoming-matches-list');
       if (!upcomingList) return;
