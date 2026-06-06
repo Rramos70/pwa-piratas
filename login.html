@@ -4,13 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Piratas de Tenerife - Iniciar Sesión</title>
-  
-  <!-- ================================================================= -->
-  <!-- CARGA PRIORITARIA DE LIBRERÍAS (Soluciona el ReferenceError)     -->
-  <!-- ================================================================= -->
-  <script src="https://gstatic.com"></script>
-  <script src="https://gstatic.com"></script>
-
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#2E7D32">
   <style>
@@ -19,6 +12,12 @@
     .btn-login { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; background-color: #2E7D32; color: white; }
     .error-msg { color: #d32f2f; font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
   </style>
+
+  <!-- ================================================================= -->
+  <!-- CARGA PRIORITARIA DE LIBRERÍAS DE FIREBASE (Evita el ReferenceError) -->
+  <!-- ================================================================= -->
+  <script src="https://gstatic.com"></script>
+  <script src="https://gstatic.com"></script>
 </head>
 <body>
   <div class="mobile-app-wrapper">
@@ -47,10 +46,13 @@
   </div>
 
   <!-- ================================================================= -->
-  <!-- LÓGICA DE LA APLICACIÓN                                           -->
+  <!-- LÓGICA DE NEGOCIO SEGURA                                         -->
   <!-- ================================================================= -->
   <script>
-    // Configuración limpia
+    // Variables globales
+    let db;
+
+    // Configuración oficial de tu proyecto
     const firebaseConfig = {
       apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
       authDomain: "://firebaseapp.com",
@@ -61,20 +63,31 @@
       appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
     };
 
-    // Inicialización segura garantizada
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+    // Inicialización cuando las librerías del head estén 100% listas
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      db = firebase.database();
+    } catch (e) {
+      console.error("Fallo crítico al inicializar Firebase. Revisa la caché del navegador.", e);
     }
-    const db = firebase.database();
 
     function procesarLogin(e) {
       e.preventDefault();
       
+      const errorBox = document.getElementById('error-box');
+      errorBox.style.display = 'none';
+
+      // Validación de contingencia por si falló la red con Firebase
+      if (!db) {
+        errorBox.textContent = "Error: No se pudo conectar con el servidor de base de datos. Recarga la página.";
+        errorBox.style.display = 'block';
+        return;
+      }
+
       const txtName = document.getElementById('login-name').value.trim();
       const txtPassword = document.getElementById('login-password').value;
-      const errorBox = document.getElementById('error-box');
-      
-      errorBox.style.display = 'none';
 
       db.ref('usuarios').once('value').then((snapshot) => {
         let listaUsuarios = [];
@@ -121,13 +134,16 @@
       });
     }
 
+    // Inicializar registros base si la base de datos está vacía al cargar el DOM
     document.addEventListener('DOMContentLoaded', () => {
-      db.ref('usuarios').once('value').then((snapshot) => {
-        if (!snapshot.exists()) {
-          db.ref('usuarios/usr_1').set({ name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' });
-          db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' });
-        }
-      }).catch(err => console.error("Error al inicializar usuarios base:", err));
+      if (db) {
+        db.ref('usuarios').once('value').then((snapshot) => {
+          if (!snapshot.exists()) {
+            db.ref('usuarios/usr_1').set({ name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' });
+            db.ref('usuarios/usr_2').set({ name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' });
+          }
+        }).catch(err => console.error("Error al verificar usuarios iniciales:", err));
+      }
     });
   </script>
 </body>
