@@ -139,7 +139,8 @@
         <span class="nav-icon" aria-hidden="true">👥</span>
         <span class="nav-label">Usuarios</span>
       </a>
-      <a href="#" class="nav-item" onclick="if(confirm('¿Deseas cerrar tu sesión en el equipo?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; } return false;">
+      <!-- MODIFICADO: Ahora ejecuta la función controlada en app.js -->
+      <a href="javascript:void(0);" class="nav-item" onclick="cerrarSesion()">
         <span class="nav-icon" style="color:#c62828;" aria-hidden="true">🚪</span>
         <span class="nav-label" style="color:#c62828;">Salir</span>
       </a>
@@ -150,7 +151,7 @@
   <script src="https://gstatic.com"></script>
   <script src="https://gstatic.com"></script>
   
-  <!-- TU SCRIPT DE LÓGICA -->
+  <!-- SCRIPT DE LÓGICA GENERAL -->
   <script src="app.js"></script>
 </body>
 </html>

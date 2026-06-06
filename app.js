@@ -3,9 +3,9 @@
 // ==========================================
 // REEMPLAZA ESTE OBJETO CON TUS CREDENCIALES REALES DE TU CONSOLA DE FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
-  authDomain: "piratas-tenerife.firebaseapp.com",
-  databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app",
+ apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
+ authDomain: "piratas-tenerife.firebaseapp.com",
+ databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "piratas-tenerife",
   storageBucket: "piratas-tenerife.firebasestorage.app",
   messagingSenderId: "328725969132",
@@ -23,12 +23,16 @@ const db = firebase.database();
 const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
 
 if (!loguedUser) {
-  // Si no hay sesión guardada en el navegador, redirigir directo al login
-  window.location.href = 'login.html';
+  // CORREGIDO: Uso de ruta explícita local para evitar fallos de ruteo en GitHub Pages
+  window.location.href = "./login.html";
 } else {
   // Inyectar datos del jugador logueado en la interfaz
-  document.getElementById('session-username').textContent = loguedUser.name;
-  document.getElementById('player-name').value = loguedUser.name;
+  if (document.getElementById('session-username')) {
+    document.getElementById('session-username').textContent = loguedUser.name;
+  }
+  if (document.getElementById('player-name')) {
+    document.getElementById('player-name').value = loguedUser.name;
+  }
   
   // Control de visibilidad del menú de administración según el rol
   if (loguedUser.role !== 'admin') {
@@ -37,7 +41,16 @@ if (!loguedUser) {
   }
 }
 
-// ID del partido actual para agrupar las asistencias en la base de datos
+// FUNCIÓN DE SALIDA CONTROLADA
+function cerrarSesion() {
+  if (confirm('¿Deseas cerrar tu sesión en el equipo?')) {
+    localStorage.removeItem('softball_logged_user');
+    // CORREGIDO: Redirección mediante asignación directa de ruta local explícita
+    window.location.href = "./login.html";
+  }
+}
+
+// ID fijo del partido actual para agrupar las asistencias en la base de datos
 const PROXIMO_PARTIDO_ID = "partido_actual";
 
 // ==========================================
@@ -69,6 +82,8 @@ db.ref(`asistencias/${PROXIMO_PARTIDO_ID}`).on('value', (snapshot) => {
   const countYes = document.getElementById('count-yes');
   const countNo = document.getElementById('count-no');
 
+  if (!listYes || !listNo) return; // Validación preventiva de existencia
+
   // Limpiar contenedores antes de renderizar
   listYes.innerHTML = "";
   listNo.innerHTML = "";
@@ -93,18 +108,30 @@ db.ref(`asistencias/${PROXIMO_PARTIDO_ID}`).on('value', (snapshot) => {
   }
 
   // Actualizar los badges numéricos
-  countYes.textContent = yesCounter;
-  countNo.textContent = noCounter;
+  if (countYes) countYes.textContent = yesCounter;
+  if (countNo) countNo.textContent = noCounter;
 });
 
 // ==========================================
-// 5. CARGA DE LISTAS DINÁMICAS (CUMPLEANIOS Y AGENDAS)
+// 5. CARGA DE LISTAS DINÁMICAS (TIEMPO REAL)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   
+  // Escuchar y pintar los datos de la cartelera principal del próximo partido
+  db.ref('proximo_partido').on('value', (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (document.getElementById('next-rival')) document.getElementById('next-rival').textContent = data.rival;
+      if (document.getElementById('next-date')) document.getElementById('next-date').textContent = data.fecha;
+      if (document.getElementById('next-time')) document.getElementById('next-time').textContent = data.hora;
+      if (document.getElementById('next-stadium')) document.getElementById('next-stadium').textContent = data.estadio;
+    }
+  });
+
   // Escuchar y pintar los cumpleaños del mes actuales en Firebase
   db.ref('cumpleanios').on('value', (snapshot) => {
     const bdayList = document.getElementById('birthday-list');
+    if (!bdayList) return;
     bdayList.innerHTML = "";
     
     if (snapshot.exists()) {
@@ -122,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Escuchar y pintar el historial de partidos realizados
   db.ref('historial_partidos').on('value', (snapshot) => {
     const historyList = document.getElementById('history-matches-list');
+    if (!historyList) return;
     historyList.innerHTML = "";
 
     if (snapshot.exists()) {
@@ -139,13 +167,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Escuchar y pintar la agenda completa de próximos encuentros
   db.ref('agenda_partidos').on('value', (snapshot) => {
     const upcomingList = document.getElementById('upcoming-matches-list');
+    if (!upcomingList) return;
     upcomingList.innerHTML = "";
 
     if (snapshot.exists()) {
       snapshot.forEach((child) => {
         const item = child.val();
         const li = document.createElement('li');
-        li.innerHTML = `🗓️ <strong>${item.rival}</strong> - ${item.fecha} a las ${item.hora}`;
+        li.innerHTML = `🗓️ <strong>${item.rival}</strong> - ${item.fecha}`;
         upcomingList.appendChild(li);
       });
     } else {

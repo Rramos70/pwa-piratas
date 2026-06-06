@@ -3,91 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Softball Club - Gestión de Usuarios</title>
+  <title>Piratas de Tenerife - Jugadores</title>
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#2E7D32">
-  <script>
-    // BLOQUEO DE SEGURIDAD INMEDIATO POR ROL
-    const session = JSON.parse(localStorage.getItem('softball_logged_user'));
-    if (!session || session.role !== 'admin') {
-      alert('Acceso denegado: Esta sección es exclusiva para administradores.');
-      window.location.href = 'index.html';
-    }
-  </script>
+  <style>
+    .user-container { padding: 15px; display: flex; flex-direction: column; gap: 20px; }
+    .user-list-box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+    .user-info { display: flex; flex-direction: column; gap: 20px; }
+    .status-badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: white; cursor: pointer; }
+    .status-activo { background-color: #2E7D32; }
+    .status-inactivo { background-color: #c62828; }
+  </style>
 </head>
 <body>
 
   <div class="mobile-app-wrapper">
     <header class="main-header">
-      <div class="header-container">
-        <h1><span aria-hidden="true">👥</span> Gestión de Usuarios</h1>
-        <p class="subtitle">Crear, Modificar y Controlar Miembros</p>
+      <div class="header-container" style="display: flex; align-items: center; gap: 12px;">
+        <img src="logop.png" alt="Logotipo" style="width: 35px; height: 35px; object-fit: contain;">
+        <div>
+          <h1 style="margin: 0; font-size: 1.2rem;">Plantilla del Club</h1>
+          <p class="subtitle" style="margin: 0;">Gestión de Jugadores</p>
+        </div>
       </div>
     </header>
 
-    <main class="app-container">
+    <main class="app-container user-container">
       
-      <!-- FORMULARIO DE USUARIO (CREAR Y EDITAR) -->
-      <section class="card match-card" aria-label="Formulario de usuario">
-        <div class="card-header">
-          <span class="pill-badge badge-warning" id="form-title">Registrar Nuevo Usuario</span>
-        </div>
-        
-        <form id="user-form" class="action-box" style="display: flex; flex-direction: column; gap: 12px; padding: 15px 0;">
-          <input type="hidden" id="edit-user-id" value="">
-          
-          <div>
-            <label for="input-user-name" class="info-label" style="display:block; margin-bottom:4px;">Nombre y Apellido</label>
-            <input type="text" id="input-user-name" class="modern-input" placeholder="Ej. Juan Pérez" required>
+      <!-- AGREGAR NUEVO JUGADOR -->
+      <section class="user-list-box">
+        <h3 style="margin-top: 0; color: #2E7D32;">➕ Registrar Nuevo Jugador</h3>
+        <form id="form-add-user" onsubmit="crearUsuario(event)">
+          <div style="margin-bottom:10px;">
+            <input type="text" id="new-user-name" class="modern-input" placeholder="Nombre y Apellido" required>
           </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div>
-              <label for="input-user-password" class="info-label" style="display:block; margin-bottom:4px;">Contraseña</label>
-              <input type="password" id="input-user-password" class="modern-input" placeholder="••••••" required>
-            </div>
-            <div>
-              <label for="input-user-phone" class="info-label" style="display:block; margin-bottom:4px;">Teléfono</label>
-              <input type="tel" id="input-user-phone" class="modern-input" placeholder="Ej. 600123456" required>
-            </div>
+          <div style="margin-bottom:10px;">
+            <input type="text" id="new-user-pass" class="modern-input" placeholder="Contraseña de Acceso" required>
           </div>
-
-          <div>
-            <label for="input-user-birth" class="info-label" style="display:block; margin-bottom:4px;">Fecha de Nacimiento</label>
-            <input type="date" id="input-user-birth" class="modern-input" required>
+          <div style="margin-bottom:10px;">
+            <select id="new-user-role" class="modern-input" style="background: white;">
+              <option value="player">Jugador Estándar</option>
+              <option value="admin">Administrador del Club</option>
+            </select>
           </div>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div>
-              <label for="select-user-role" class="info-label" style="display:block; margin-bottom:4px;">Rol</label>
-              <select id="select-user-role" class="modern-input" style="background-color: white;" required>
-                <option value="guest">Invitado / Jugador</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-            <div>
-              <label for="select-user-status" class="info-label" style="display:block; margin-bottom:4px;">Estado Inicial</label>
-              <select id="select-user-status" class="modern-input" style="background-color: white;" required>
-                <option value="activo">Activo</option>
-                <option value="inactivo">Inactivo</option>
-              </select>
-            </div>
-          </div>
-          
-          <div style="display: flex; gap: 8px; margin-top: 10px;">
-            <button type="submit" id="btn-submit-user" class="btn-vote btn-confirm" style="flex: 2;">💾 Guardar Usuario</button>
-            <button type="button" id="btn-cancel-edit" class="btn-vote btn-decline" style="flex: 1; display: none;" onclick="cancelarEdicion()">Cancelar</button>
-          </div>
+          <button type="submit" class="modern-input" style="background: #2E7D32; color:white; font-weight:bold; border:none; cursor:pointer;">Registrar en la Nube</button>
         </form>
       </section>
 
-      <!-- LISTADO GLOBAL DE USUARIOS EN EL SISTEMA -->
-      <section class="card lists-card" aria-label="Lista global de usuarios">
-        <h4 class="list-title" style="margin-bottom:12px;">Usuarios del Sistema</h4>
-        <ul id="users-system-list" class="modern-player-list" style="display:flex; flex-direction:column; gap:10px; padding: 0;">
-          <!-- Se inyecta dinámicamente con JavaScript -->
-        </ul>
+      <!-- ROSTER EN TIEMPO REAL -->
+      <section class="user-list-box">
+        <h3 style="margin-top: 0; color: #555;">👥 Lista de Jugadores Registrados</h3>
+        <div id="roster-list-wrapper">
+          <!-- Inyección dinámica desde Firebase -->
+        </div>
       </section>
+
     </main>
 
     <!-- MENÚ DE NAVEGACIÓN -->
@@ -104,163 +75,90 @@
         <span class="nav-icon" aria-hidden="true">👥</span>
         <span class="nav-label">Usuarios</span>
       </a>
-      <button type="button" class="nav-item" onclick="if(confirm('¿Deseas cerrar tu sesión en el equipo?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; }">
+      <a href="#" class="nav-item" onclick="if(confirm('¿Cerrar sesión?')) { localStorage.removeItem('softball_logged_user'); window.location.href='login.html'; } return false;">
         <span class="nav-icon" style="color:#c62828;" aria-hidden="true">🚪</span>
         <span class="nav-label" style="color:#c62828;">Salir</span>
-      </button>
+      </a>
     </nav>
   </div>
+
+  <script src="https://gstatic.com"></script>
+  <script src="https://gstatic.com"></script>
+  
   <script>
-    let usuarios = [];
+    // REEMPLAZA CON TU CONFIGURACIÓN DE FIREBASE
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY_AQUÍ",
+      authDomain: "TU_AUTH_DOMAIN_AQUÍ",
+      databaseURL: "TU_DATABASE_URL_AQUÍ",
+      projectId: "TU_PROJECT_ID_AQUÍ",
+      storageBucket: "TU_STORAGE_BUCKET_AQUÍ",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID_AQUÍ",
+      appId: "TU_APP_ID_AQUÍ"
+    };
 
-    document.addEventListener('DOMContentLoaded', () => {
-      inicializarUsuarios();
-      document.getElementById('user-form').addEventListener('submit', guardarUsuario);
-    });
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    function inicializarUsuarios() {
-      usuarios = JSON.parse(localStorage.getItem('softball_users_list'));
-      
-      if (!usuarios || usuarios.length === 0) {
-        usuarios = [
-          { id: 'usr_1', name: 'Administrador General', password: 'admin', phone: '000000000', birth: '1990-01-01', role: 'admin', status: 'activo' },
-          { id: 'usr_2', name: 'Invitado de Pruebas', password: 'guest', phone: '111222333', birth: '1995-05-05', role: 'guest', status: 'activo' }
-        ];
-        localStorage.setItem('softball_users_list', JSON.stringify(usuarios));
-      }
-      
-      renderizarUsuarios();
+    // FILTRO DE SEGURIDAD ESTRICTO
+    const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
+    if (!loguedUser || loguedUser.role !== 'admin') {
+      window.location.href = 'index.html';
     }
 
-    function renderizarUsuarios() {
-      const listaContainer = document.getElementById('users-system-list');
-      listaContainer.innerHTML = '';
-
-      usuarios.forEach(u => {
-        const li = document.createElement('li');
-        const esInactivo = u.status === 'inactivo';
-        
-        li.style.display = 'flex';
-        li.style.flexDirection = 'column';
-        li.style.gap = '8px';
-        li.style.padding = '12px';
-        li.style.background = esInactivo ? '#f5f5f5' : '#e8f5e9';
-        li.style.borderRadius = '8px';
-        li.style.borderLeft = esInactivo ? '4px solid #78909c' : '4px solid #2E7D32';
-        li.style.opacity = esInactivo ? '0.7' : '1';
-
-        // Formatear fecha de nacimiento a formato local en español
-        let fechaFormateada = u.birth;
-        if(u.birth) {
-          const dateObj = new Date(u.birth + 'T00:00:00');
-          if(!isNaN(dateObj)) {
-            fechaFormateada = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(dateObj);
-          }
-        }
-
-        li.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-              <strong style="${esInactivo ? 'text-decoration: line-through; color: #78909c;' : ''}">${u.name}</strong>
-              <small style="display:block; color:#555; margin-top:2px;">Rol: ${u.role === 'admin' ? 'Administrador' : 'Jugador / Invitado'}</small>
-              <small style="display:block; color:#777;">📞 Tel: ${u.phone || '-'} | 🎂 Nac: ${fechaFormateada || '-'}</small>
-            </div>
-            <span class="pill-badge ${esInactivo ? 'badge-warning' : 'badge-success'}" style="font-size:11px; text-transform: uppercase;">
-              ${u.status}
-            </span>
-          </div>
-          
-          <div style="display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px;">
-            <button type="button" class="btn-vote" style="padding: 4px 10px; font-size: 12px; background-color: #0288d1; color: white;" onclick="prepararEdicion('${u.id}')">✏️ Editar</button>
-            <button type="button" class="btn-vote" style="padding: 4px 10px; font-size: 12px; background-color: ${esInactivo ? '#2E7D32' : '#f57c00'}; color: white;" onclick="alternarEstado('${u.id}')">
-              ${esInactivo ? '⚡ Activar' : '🚫 Desactivar'}
-            </button>
-            <button type="button" class="btn-vote" style="padding: 4px 10px; font-size: 12px; background-color: #d32f2f; color: white;" onclick="eliminarUsuario('${u.id}')">🗑️ Eliminar</button>
-          </div>
-        `;
-        listaContainer.appendChild(li);
-      });
-    }
-    function guardarUsuario(e) {
+    // CREAR UN JUGADOR NUEVO EN FIREBASE
+    function crearUsuario(e) {
       e.preventDefault();
-      
-      const idEditar = document.getElementById('edit-user-id').value;
-      const nombre = document.getElementById('input-user-name').value.trim();
-      const password = document.getElementById('input-user-password').value;
-      const phone = document.getElementById('input-user-phone').value.trim();
-      const birth = document.getElementById('input-user-birth').value;
-      const rol = document.getElementById('select-user-role').value;
-      const estado = document.getElementById('select-user-status').value;
+      const uName = document.getElementById('new-user-name').value.trim();
+      const uPass = document.getElementById('new-user-pass').value;
+      const uRole = document.getElementById('new-user-role').value;
 
-      if (idEditar) {
-        usuarios = usuarios.map(u => u.id === idEditar ? { ...u, name: nombre, password: password, phone: phone, birth: birth, role: rol, status: estado } : u);
-        alert('Usuario modificado correctamente.');
-      } else {
-        const nuevoUsuario = {
-          id: 'usr_' + Date.now(),
-          name: nombre,
-          password: password,
-          phone: phone,
-          birth: birth,
-          role: rol,
-          status: estado
-        };
-        usuarios.push(nuevoUsuario);
-        alert('Usuario registrado con éxito.');
-      }
-
-      localStorage.setItem('softball_users_list', JSON.stringify(usuarios));
-      cancelarEdicion();
-      renderizarUsuarios();
-    }
-
-    function prepararEdicion(id) {
-      const usuario = usuarios.find(u => u.id === id);
-      if (!usuario) return;
-
-      document.getElementById('edit-user-id').value = usuario.id;
-      document.getElementById('input-user-name').value = usuario.name;
-      document.getElementById('input-user-password').value = usuario.password || '';
-      document.getElementById('input-user-phone').value = usuario.phone || '';
-      document.getElementById('input-user-birth').value = usuario.birth || '';
-      document.getElementById('select-user-role').value = usuario.role;
-      document.getElementById('select-user-status').value = usuario.status;
-
-      document.getElementById('form-title').textContent = "Modificar Usuario";
-      document.getElementById('btn-submit-user').textContent = "💾 Actualizar Usuario";
-      document.getElementById('btn-cancel-edit').style.display = 'block';
-      
-      document.getElementById('input-user-name').focus();
-    }
-
-    function cancelarEdicion() {
-      document.getElementById('user-form').reset();
-      document.getElementById('edit-user-id').value = "";
-      document.getElementById('form-title').textContent = "Registrar Nuevo Usuario";
-      document.getElementById('btn-submit-user').textContent = "💾 Guardar Usuario";
-      document.getElementById('btn-cancel-edit').style.display = 'none';
-    }
-
-    function alternarEstado(id) {
-      usuarios = usuarios.map(u => {
-        if (u.id === id) {
-          const nuevoEstado = u.status === 'activo' ? 'inactivo' : 'activo';
-          return { ...u, status: nuevoEstado };
-        }
-        return u;
+      // Generar una clave única aleatoria basada en push()
+      const nuevoUserRef = db.ref('usuarios').push();
+      nuevoUserRef.set({
+        name: uName,
+        password: uPass,
+        role: uRole,
+        status: 'activo'
+      }).then(() => {
+        alert(`¡${uName} registrado correctamente!`);
+        document.getElementById('form-add-user').reset();
       });
-      
-      localStorage.setItem('softball_users_list', JSON.stringify(usuarios));
-      renderizarUsuarios();
     }
 
-    function eliminarUsuario(id) {
-      if (confirm('¿Estás completamente seguro de que deseas eliminar permanentemente a este usuario?')) {
-        usuarios = usuarios.filter(u => u.id !== id);
-        localStorage.setItem('softball_users_list', JSON.stringify(usuarios));
-        renderizarUsuarios();
-      }
+    // CAMBIAR EL ESTADO (ACTIVO/INACTIVO) AL HACER CLICK EN EL BADGE
+    function toggleStatus(userId, currentStatus) {
+      const nextStatus = currentStatus === 'activo' ? 'inactivo' : 'activo';
+      db.ref(`usuarios/${userId}/status`).set(nextStatus);
     }
+
+    // ESCUCHAR EN TIEMPO REAL LA LISTA DE USUARIOS
+    db.ref('usuarios').on('value', (snapshot) => {
+      const container = document.getElementById('roster-list-wrapper');
+      container.innerHTML = "";
+
+      if(snapshot.exists()) {
+        snapshot.forEach((child) => {
+          const uId = child.key;
+          const user = child.val();
+
+          const itemDiv = document.createElement('div');
+          itemDiv.className = "user-item";
+          itemDiv.innerHTML = `
+            <div>
+              <strong style="display:block;">${user.name}</strong>
+              <small style="color:#777;">Rol: ${user.role} | Clave: ${user.password}</small>
+            </div>
+            <span class="status-badge status-${user.status}" onclick="toggleStatus('${uId}', '${user.status}')">
+              ${user.status}
+            </span>
+          `;
+          container.appendChild(itemDiv);
+        });
+      } else {
+        container.innerHTML = "<p style='color:#777;'>No hay usuarios en la base de datos.</p>";
+      }
+    });
   </script>
 </body>
 </html>
