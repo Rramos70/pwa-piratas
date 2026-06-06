@@ -3,13 +3,14 @@
 // ==========================================
 const firebaseConfig = {
  apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
- authDomain: "://firebaseapp.com", // CORREGIDO: ID del proyecto integrado
- databaseURL: "https://firebasedatabase.app",     // NOTA: Asegúrate de que coincida con tu consola
+ authDomain: "://firebaseapp.com",
+ databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app/", // ACTUALIZADO
  projectId: "piratas-tenerife",
  storageBucket: "piratas-tenerife.firebasestorage.app",
  messagingSenderId: "328725969132",
  appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
 };
+
 
 // Inicializar la App de forma segura sin duplicar instancias
 if (!firebase.apps.length) {
