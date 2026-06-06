@@ -3,7 +3,7 @@
 // ==========================================
 const firebaseConfig = {
  apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
- authDomain: "://firebaseapp.com",
+ authDomain: "piratas-tenerife.firebaseapp.com", // CORREGIDO: Añadido el ID del proyecto
  databaseURL: "https://firebasedatabase.app",
  projectId: "piratas-tenerife",
  storageBucket: "piratas-tenerife.firebasestorage.app",
@@ -11,8 +11,10 @@ const firebaseConfig = {
  appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
 };
 
-// Inicializar la App en la Web
-firebase.initializeApp(firebaseConfig);
+// Inicializar Firebase de forma segura
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.database();
 
 // ==========================================
@@ -21,22 +23,23 @@ const db = firebase.database();
 const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
 const currentFilename = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
 
-// SOLO validar y redirigir si no estamos en login.html
+// Validar y redirigir según sesión
 if (!loguedUser && currentFilename !== "login.html" && currentFilename !== "") {
   window.location.href = "login.html";
 } else if (loguedUser) {
-  // Inyectar datos del jugador logueado en la interfaz si existen los elementos
-  if (document.getElementById('session-username')) {
-    document.getElementById('session-username').textContent = loguedUser.name;
-  }
-  if (document.getElementById('player-name')) {
-    document.getElementById('player-name').value = loguedUser.name;
-  }
+  // Inyectar de forma segura datos del jugador logueado
+  const sessionUsernameElem = document.getElementById('session-username');
+  const playerNameElem = document.getElementById('player-name');
+  
+  if (sessionUsernameElem) sessionUsernameElem.textContent = loguedUser.name;
+  if (playerNameElem) playerNameElem.value = loguedUser.name;
   
   // Control de visibilidad del menú de administración según el rol
   if (loguedUser.role !== 'admin') {
-    if (document.getElementById('nav-link-admin')) document.getElementById('nav-link-admin').style.display = 'none';
-    if (document.getElementById('nav-link-users')) document.getElementById('nav-link-users').style.display = 'none';
+    const navAdmin = document.getElementById('nav-link-admin');
+    const navUsers = document.getElementById('nav-link-users');
+    if (navAdmin) navAdmin.style.display = 'none';
+    if (navUsers) navUsers.style.display = 'none';
   }
 }
 
@@ -48,14 +51,17 @@ function cerrarSesion() {
   }
 }
 
-// ID fijo del partido actual para agrupar las asistencias en la base de datos
+// ID fijo del partido actual
 const PROXIMO_PARTIDO_ID = "partido_actual";
 
 // ==========================================
 // 3. ENVÍO DE ASISTENCIA A LA NUBE
 // ==========================================
 function confirmAttendance(statusAsistencia) {
-  if (!loguedUser) return;
+  if (!loguedUser) {
+    alert("Debes iniciar sesión para registrar tu asistencia.");
+    return;
+  }
 
   db.ref(`asistencias/${PROXIMO_PARTIDO_ID}/${loguedUser.id}`).set({
     name: loguedUser.name,
@@ -73,10 +79,11 @@ function confirmAttendance(statusAsistencia) {
 // ==========================================
 // 4. ESCUCHA ACTIVA DE ASISTENCIAS (TIEMPO REAL)
 // ==========================================
-if (document.getElementById('list-yes') && document.getElementById('list-no')) {
+const listYes = document.getElementById('list-yes');
+const listNo = document.getElementById('list-no');
+
+if (listYes && listNo) {
   db.ref(`asistencias/${PROXIMO_PARTIDO_ID}`).on('value', (snapshot) => {
-    const listYes = document.getElementById('list-yes');
-    const listNo = document.getElementById('list-no');
     const countYes = document.getElementById('count-yes');
     const countNo = document.getElementById('count-no');
 
@@ -111,20 +118,26 @@ if (document.getElementById('list-yes') && document.getElementById('list-no')) {
 // 5. CARGA DE LISTAS DINÁMICAS (TIEMPO REAL)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Evitar ejecuciones si estamos en la pantalla de login
   if (currentFilename === "login.html") return;
   
   if (db) {
+    // Datos del próximo partido
     db.ref('proximo_partido').on('value', (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        if (document.getElementById('next-rival')) document.getElementById('next-rival').textContent = data.rival;
-        if (document.getElementById('next-date')) document.getElementById('next-date').textContent = data.fecha;
-        if (document.getElementById('next-time')) document.getElementById('next-time').textContent = data.hora;
-        if (document.getElementById('next-stadium')) document.getElementById('next-stadium').textContent = data.estadio;
+        const rival = document.getElementById('next-rival');
+        const fecha = document.getElementById('next-date');
+        const hora = document.getElementById('next-time');
+        const estadio = document.getElementById('next-stadium');
+
+        if (rival) rival.textContent = data.rival || '';
+        if (fecha) fecha.textContent = data.fecha || '';
+        if (hora) hora.textContent = data.hora || '';
+        if (estadio) estadio.textContent = data.estadio || '';
       }
     });
 
+    // Cumpleaños
     db.ref('cumpleanios').on('value', (snapshot) => {
       const bdayList = document.getElementById('birthday-list');
       if (!bdayList) return;
@@ -142,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Historial de partidos
     db.ref('historial_partidos').on('value', (snapshot) => {
       const historyList = document.getElementById('history-matches-list');
       if (!historyList) return;
@@ -159,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Agenda de partidos futuros
     db.ref('agenda_partidos').on('value', (snapshot) => {
       const upcomingList = document.getElementById('upcoming-matches-list');
       if (!upcomingList) return;
