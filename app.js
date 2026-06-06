@@ -1,7 +1,6 @@
 // ==========================================
 // 1. CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
 // ==========================================
-// REEMPLAZA ESTE OBJETO CON TUS CREDENCIALES REALES DE TU CONSOLA DE FIREBASE
 const firebaseConfig = {
  apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
  authDomain: "piratas-tenerife.firebaseapp.com",
@@ -18,13 +17,30 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ==========================================
-// 2. CONTROL DE ACCESO Y SESIÓN LOCAL
+// 2. FUNCIÓN DE DETECCIÓN DE RUTA ABSOLUTA AUTOMÁTICA
+// ==========================================
+function redirigirA(pagina) {
+  const loc = window.location;
+  // Extrae la ruta base del repositorio (ej: /piratas/) o devuelve / si es local
+  const pathArray = loc.pathname.split('/');
+  const isGitHubPages = loc.hostname.includes('github.io');
+  
+  if (isGitHubPages && pathArray.length > 2) {
+    const repoName = pathArray[1];
+    loc.href = `${loc.origin}/${repoName}/${pagina}`;
+  } else {
+    loc.href = `${loc.origin}/${pagina}`;
+  }
+}
+
+// ==========================================
+// 3. CONTROL DE ACCESO Y SESIÓN LOCAL
 // ==========================================
 const loguedUser = JSON.parse(localStorage.getItem('softball_logged_user'));
 
 if (!loguedUser) {
-  // CORREGIDO: Uso de ruta explícita local para evitar fallos de ruteo en GitHub Pages
-  window.location.href = "./login.html";
+  // Redirección inteligente corregida
+  redirigirA('login.html');
 } else {
   // Inyectar datos del jugador logueado en la interfaz
   if (document.getElementById('session-username')) {
@@ -45,8 +61,7 @@ if (!loguedUser) {
 function cerrarSesion() {
   if (confirm('¿Deseas cerrar tu sesión en el equipo?')) {
     localStorage.removeItem('softball_logged_user');
-    // CORREGIDO: Redirección mediante asignación directa de ruta local explícita
-    window.location.href = "./login.html";
+    redirigirA('login.html');
   }
 }
 
@@ -54,12 +69,11 @@ function cerrarSesion() {
 const PROXIMO_PARTIDO_ID = "partido_actual";
 
 // ==========================================
-// 3. ENVÍO DE ASISTENCIA A LA NUBE
+// 4. ENVÍO DE ASISTENCIA A LA NUBE
 // ==========================================
 function confirmAttendance(statusAsistencia) {
   if (!loguedUser) return;
 
-  // Guardar en la ruta asistencias/partido_actual/id_del_usuario
   db.ref(`asistencias/${PROXIMO_PARTIDO_ID}/${loguedUser.id}`).set({
     name: loguedUser.name,
     plays: statusAsistencia
@@ -74,7 +88,7 @@ function confirmAttendance(statusAsistencia) {
 }
 
 // ==========================================
-// 4. ESCUCHA ACTIVA DE ASISTENCIAS (TIEMPO REAL)
+// 5. ESCUCHA ACTIVA DE ASISTENCIAS (TIEMPO REAL)
 // ==========================================
 db.ref(`asistencias/${PROXIMO_PARTIDO_ID}`).on('value', (snapshot) => {
   const listYes = document.getElementById('list-yes');
@@ -82,9 +96,8 @@ db.ref(`asistencias/${PROXIMO_PARTIDO_ID}`).on('value', (snapshot) => {
   const countYes = document.getElementById('count-yes');
   const countNo = document.getElementById('count-no');
 
-  if (!listYes || !listNo) return; // Validación preventiva de existencia
+  if (!listYes || !listNo) return;
 
-  // Limpiar contenedores antes de renderizar
   listYes.innerHTML = "";
   listNo.innerHTML = "";
   
@@ -107,17 +120,15 @@ db.ref(`asistencias/${PROXIMO_PARTIDO_ID}`).on('value', (snapshot) => {
     });
   }
 
-  // Actualizar los badges numéricos
   if (countYes) countYes.textContent = yesCounter;
   if (countNo) countNo.textContent = noCounter;
 });
 
 // ==========================================
-// 5. CARGA DE LISTAS DINÁMICAS (TIEMPO REAL)
+// 6. CARGA DE LISTAS DINÁMICAS (TIEMPO REAL)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   
-  // Escuchar y pintar los datos de la cartelera principal del próximo partido
   db.ref('proximo_partido').on('value', (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
@@ -128,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Escuchar y pintar los cumpleaños del mes actuales en Firebase
   db.ref('cumpleanios').on('value', (snapshot) => {
     const bdayList = document.getElementById('birthday-list');
     if (!bdayList) return;
@@ -146,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Escuchar y pintar el historial de partidos realizados
   db.ref('historial_partidos').on('value', (snapshot) => {
     const historyList = document.getElementById('history-matches-list');
     if (!historyList) return;
@@ -164,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Escuchar y pintar la agenda completa de próximos encuentros
   db.ref('agenda_partidos').on('value', (snapshot) => {
     const upcomingList = document.getElementById('upcoming-matches-list');
     if (!upcomingList) return;

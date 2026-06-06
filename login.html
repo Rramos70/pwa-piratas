@@ -1,23 +1,75 @@
-  <!-- Importar Firebase desde la Web -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Piratas de Tenerife - Iniciar Sesión</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#2E7D32">
+  <style>
+    .login-container { max-width: 400px; margin: 40px auto; padding: 20px; text-align: center; }
+    .form-group { text-align: left; margin-bottom: 15px; }
+    .btn-login { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; background-color: #2E7D32; color: white; }
+    .error-msg { color: #d32f2f; font-size: 14px; margin-top: 10px; display: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="mobile-app-wrapper">
+    <div class="card login-container">
+      <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+        <img src="logop.png" alt="Logotipo de Piratas de Tenerife" style="width: 65px; height: 65px; object-fit: contain;">
+      </div>
+      <h1><span aria-hidden="true">🥎</span> PIRATAS DE TENERIFE</h1>
+      <p style="color: #555; margin-bottom: 20px;">Introduce tus credenciales para acceder</p>
+      
+      <form id="login-form" onsubmit="procesarLogin(event)">
+        <div class="form-group">
+          <label for="login-name" class="info-label" style="display:block; margin-bottom:4px;">Nombre y Apellido</label>
+          <input type="text" id="login-name" class="modern-input" placeholder="Ej. Juan Pérez" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="login-password" class="info-label" style="display:block; margin-bottom:4px;">Contraseña</label>
+          <input type="password" id="login-password" class="modern-input" placeholder="••••••••" required>
+        </div>
+        
+        <button type="submit" class="btn-login">🔑 Entrar al Equipo</button>
+        <div id="error-box" class="error-msg"></div>
+      </form>
+    </div>
+  </div>
+
   <script src="https://gstatic.com"></script>
   <script src="https://gstatic.com"></script>
 
   <script>
-    // 1. REEMPLAZA ESTO CON TUS DATOS REALES DE FIREBASE COPIADOS EN EL PASO 1
-const firebaseConfig = {
-  apiKey: "AIzaSyCVpr7XujBtSj6dB134rx3dLASgepWkJak",
-  authDomain: "piratas-tenerife.firebaseapp.com",
-  databaseURL: "https://piratas-tenerife-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "piratas-tenerife",
-  storageBucket: "piratas-tenerife.firebasestorage.app",
-  messagingSenderId: "328725969132",
-  appId: "1:328725969132:web:d1242cf35ed2e42b234dc9"
-};
+    // REEMPLAZA ESTO CON TUS DATOS REALES DE FIREBASE
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY_AQUÍ",
+      authDomain: "TU_AUTH_DOMAIN_AQUÍ",
+      databaseURL: "TU_DATABASE_URL_AQUÍ",
+      projectId: "TU_PROJECT_ID_AQUÍ",
+      storageBucket: "TU_STORAGE_BUCKET_AQUÍ",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID_AQUÍ",
+      appId: "TU_APP_ID_AQUÍ"
+    };
 
-
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
+    // Función de ruteo inteligente idéntica
+    function redirigirA(pagina) {
+      const loc = window.location;
+      const pathArray = loc.pathname.split('/');
+      const isGitHubPages = loc.hostname.includes('github.io');
+      
+      if (isGitHubPages && pathArray.length > 2) {
+        const repoName = pathArray[1];
+        loc.href = `${loc.origin}/${repoName}/${pagina}`;
+      } else {
+        loc.href = `${loc.origin}/${pagina}`;
+      }
+    }
 
     function procesarLogin(e) {
       e.preventDefault();
@@ -28,24 +80,20 @@ const firebaseConfig = {
       
       errorBox.style.display = 'none';
 
-      // 2. Leer los usuarios en tiempo real desde Firebase
       db.ref('usuarios').once('value').then((snapshot) => {
         let listaUsuarios = [];
         
         if (snapshot.exists()) {
-          // Si existen en la base de datos, los transformamos en array
           snapshot.forEach((childSnapshot) => {
             listaUsuarios.push({ id: childSnapshot.key, ...childSnapshot.val() });
           });
         } else {
-          // Si la base de datos está vacía, usamos los administradores base
           listaUsuarios = [
             { id: 'usr_1', name: 'Administrador General', password: 'admin', role: 'admin', status: 'activo' },
             { id: 'usr_2', name: 'Invitado de Pruebas', password: 'guest', role: 'guest', status: 'activo' }
           ];
         }
 
-        // 3. Buscar coincidencia
         const usuarioEncontrado = listaUsuarios.find(u => u.name.toLowerCase() === txtName.toLowerCase());
 
         if (!usuarioEncontrado) {
@@ -66,7 +114,6 @@ const firebaseConfig = {
           return;
         }
 
-        // Guardamos solo la sesión en local (para saber quién tiene el teléfono en la mano)
         const sesionUsuario = {
           id: usuarioEncontrado.id,
           role: usuarioEncontrado.role,
@@ -74,11 +121,12 @@ const firebaseConfig = {
         };
         
         localStorage.setItem('softball_logged_user', JSON.stringify(sesionUsuario));
-        window.location.href = 'index.html';
+        
+        // Redirección inteligente corregida
+        redirigirA('index.html');
       });
     }
 
-    // Inyectar usuarios base en la nube si está completamente vacía la app
     document.addEventListener('DOMContentLoaded', () => {
       db.ref('usuarios').once('value').then((snapshot) => {
         if (!snapshot.exists()) {
@@ -88,3 +136,5 @@ const firebaseConfig = {
       });
     });
   </script>
+</body>
+</html>
